@@ -1,5 +1,6 @@
 package com.example.myapp.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.room.util.TableInfo
 import com.example.myapp.data.model.Tag
 
@@ -56,7 +58,8 @@ import com.example.myapp.data.model.Tag
 fun PhotoDetailContent(
     photo: PhotoResponse,
     navController: NavController,
-    placeholder: Painter? = null
+    placeholder: Painter? = null,
+    onUserClick: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -117,17 +120,34 @@ fun PhotoDetailContent(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AsyncImage(
-                    model = photo.user?.profile_image?.medium,
-                    contentDescription = "User Avatar",
-                    placeholder = placeholder,
-                    error = placeholder,
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(photo.user?.name ?: "Unknown", style = MaterialTheme.typography.titleMedium)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            photo.user?.username?.let { username ->
+                                onUserClick(username)
+                            }
+                        }
+                        .padding(4.dp)
+                ) {
+                    AsyncImage(
+                        model = photo.user?.profile_image?.medium,
+                        contentDescription = "User Avatar",
+                        placeholder = placeholder,
+                        error = placeholder,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = photo.user?.name ?: "Unknown",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+
                 Spacer(Modifier.weight(1f))
 
                 IconButton(onClick = { /*TODO*/ }) {
@@ -329,7 +349,8 @@ fun PhotoDetailContent() {
             PhotoDetailContent(
                 photo = fakePhoto,
                 navController = NavController(LocalContext.current),
-                placeholder = imageHolder
+                placeholder = imageHolder,
+                onUserClick = {}
             )
         }
     }

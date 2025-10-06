@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.PhotoListItem
 import com.example.myapp.ui.home.CollectionDetailViewModel
 import com.example.myapp.utils.UiState
@@ -42,7 +43,6 @@ fun CollectionDetailScreen(
     navController: NavController,
     viewModel: CollectionDetailViewModel = hiltViewModel(),
 ) {
-
     val uiState by viewModel.collectionList.collectAsState()
     val collectionInfo by viewModel.collectionInfo.collectAsState()
 
@@ -125,9 +125,12 @@ fun CollectionDetailScreen(
                     items(items = state.data, key = { it.id }) { photo ->
                         PhotoListItem(
                             photo = photo, onItemClick = { photoId ->
+                                navController.navigate(Screen.Detail.createRoute(photoId))
                             },
                             placeholder = null,
-                            onUserClick = {}
+                            onUserClick = { username ->
+                                navController.navigate(Screen.Profile.createRoute(username))
+                            }
                         )
                     }
                 }

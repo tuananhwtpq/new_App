@@ -7,4 +7,5 @@ interface UserRepository {
 
     suspend fun getUserProfile(username: String): Result<User>
     suspend fun getUserPhotos(username: String, page: Int): Result<List<PhotoResponse>>
+    suspend fun getUserLikePhoto(username: String, page: Int): Result<List<PhotoResponse>>
 }

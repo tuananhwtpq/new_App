@@ -42,7 +42,8 @@ import java.nio.file.WatchEvent
 fun CollectionListItem(
     collection: CollectionResponse,
     onItemClick: (String) -> Unit,
-    placeholder: Painter? = null
+    placeholder: Painter? = null,
+    onUserClick: (String) -> Unit
 ) {
 
     Column(
@@ -52,7 +53,14 @@ fun CollectionListItem(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable(
+                    onClick = {
+                        collection.user.username.let {
+                            onUserClick(it.toString())
+                        }
+                    }
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -115,7 +123,7 @@ fun CollectionListItem(
                     )
                 }
             }
-            
+
         }
 
     }
@@ -178,7 +186,8 @@ fun CollectionListItem() {
             CollectionListItem(
                 collection = newCollection,
                 onItemClick = {},
-                placeholder = imageHolder
+                placeholder = imageHolder,
+                onUserClick = {}
             )
         }
     }

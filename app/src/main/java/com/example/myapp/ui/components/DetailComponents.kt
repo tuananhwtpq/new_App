@@ -37,6 +37,29 @@ fun InfoItem(title: String, value: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun InfoItem2(title: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+        Text(
+            text = title, style = MaterialTheme.typography.bodySmall, color = Color.Gray,
+            fontWeight = FontWeight.Bold
+        )
+
+    }
+}
+
+
+@Composable
 fun TagChip(text: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
@@ -69,6 +92,17 @@ fun TagChipPreview() {
     MyAppTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
             TagChip(text = "Cat")
+        }
+    }
+}
+
+@Preview
+@Composable
+fun InfoItemPreview2() {
+
+    MyAppTheme {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            InfoItem2(title = "Camera", value = "Canon EOS 5D Mark IV")
         }
     }
 }

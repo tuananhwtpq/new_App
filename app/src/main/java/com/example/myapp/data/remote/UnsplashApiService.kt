@@ -86,4 +86,11 @@ interface UnsplashApiService {
         @Query("per_page") perPage: Int
     ): List<PhotoResponse>
 
+    @GET("users/{username}/likes")
+    suspend fun getUserLikes(
+        @Path("username") username: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): List<PhotoResponse>
+
 }

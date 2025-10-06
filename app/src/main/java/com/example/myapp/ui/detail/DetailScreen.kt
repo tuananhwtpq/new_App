@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.PhotoDetailContent
 import com.example.myapp.ui.theme.MyAppTheme
 import com.example.myapp.utils.UiState
@@ -70,7 +71,11 @@ fun DetailScreen(
                 }
 
                 is UiState.Success -> {
-                    PhotoDetailContent(photo = state.data, navController = navController)
+                    PhotoDetailContent(
+                        photo = state.data, navController = navController,
+                        onUserClick = { username ->
+                            navController.navigate(Screen.Profile.createRoute(username))
+                        })
                 }
 
                 is UiState.Error -> {

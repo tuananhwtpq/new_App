@@ -58,8 +58,8 @@ fun PhotoListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    photo.user?.name.let { onUserClick(it.toString()) }
-                    photo.user?.profile_image.let { onUserClick(it.toString()) }
+                    photo.user?.username.let { onUserClick(it.toString()) }
+                    //photo.user?.profile_image.let { onUserClick(it.toString()) }
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {

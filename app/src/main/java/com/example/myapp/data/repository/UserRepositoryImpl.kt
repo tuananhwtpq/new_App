@@ -36,4 +36,18 @@ class UserRepositoryImpl @Inject constructor(
 
         }
     }
+
+    override suspend fun getUserLikePhoto(
+        username: String,
+        page: Int
+    ): Result<List<PhotoResponse>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getUserLikes(username, page, 10)
+                Result.success(response)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }

@@ -8,26 +8,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.FabPosition
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,7 @@ import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.CollectionListItem
+import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.components.PhotoListItem
 import com.example.myapp.ui.theme.MyAppTheme
 import com.example.myapp.utils.UiState
@@ -63,7 +67,11 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TabRow(selectedTabIndex = pageState.currentPage) {
+            TabRow(
+                selectedTabIndex = pageState.currentPage,
+                modifier = Modifier.statusBarsPadding(),
+                backgroundColor = Color.White
+            ) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(
                         selected = pageState.currentPage == index,
@@ -72,39 +80,50 @@ fun HomeScreen(
                                 pageState.animateScrollToPage(index)
                             }
                         },
-                        text = { Text(text = title) }
+                        text = { Text(text = title, color = Color.Black) }
                     )
                 }
             }
         },
 
+
+        floatingActionButtonPosition = FabPosition.Center,
+        isFloatingActionButtonDocked = true,
+
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { }
+                shape = CircleShape,
+                onClick = { /* TODO: Handle FAB click */ },
+                backgroundColor = Color.Black
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add")
+                Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
             }
         },
-        floatingActionButtonPosition = FabPosition.Center,
 
         bottomBar = {
-            BottomAppBar {
+            BottomAppBar(
+                cutoutShape = CircleShape,
+                backgroundColor = Color.White,
+                elevation = 8.dp
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { /*TODO*/ }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
                     }
 
                     Row {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = {
+                            navController.navigate(Screen.Search.route)
+                        }) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { /*TODO*/ }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More Options")
                         }
                     }
@@ -135,7 +154,11 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeTabContent(photos: List<PhotoResponse>, onPhotoClick: (String) -> Unit) {
+fun HomeTabContent(
+    photos: List<PhotoResponse>,
+    onPhotoClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 8.dp)
@@ -147,7 +170,7 @@ fun HomeTabContent(photos: List<PhotoResponse>, onPhotoClick: (String) -> Unit) 
             PhotoListItem(
                 photo = photo, onItemClick = onPhotoClick,
                 placeholder = null,
-                onUserClick = {}
+                onUserClick = onUserClick
 //                onUserClick = {username ->
 //                    navController.navigate(Screen.Profile.createRoute(username))
 //                }
@@ -170,22 +193,18 @@ fun PhotoScreen(navController: NavController, viewModel: HomeViewModel = hiltVie
     ) {
         when (val state = uiState) {
             is UiState.Loading -> {
-
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                    )
-                }
+                LottieLoadingIndicator()
             }
 
             is UiState.Success -> {
-                HomeTabContent(photos = state.data, onPhotoClick = { photoId ->
-                    navController.navigate(Screen.Detail.createRoute(photoId))
-                })
+                HomeTabContent(
+                    photos = state.data, onPhotoClick = { photoId ->
+                        navController.navigate(Screen.Detail.createRoute(photoId))
+                    },
+                    onUserClick = { username ->
+                        navController.navigate(Screen.Profile.createRoute(username))
+                    }
+                )
             }
 
             is UiState.Error -> {
@@ -217,26 +236,20 @@ fun CollectionScreen(navController: NavController, viewModel: HomeViewModel = hi
         when (val state = uiState) {
             is UiState.Loading -> {
 
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                    )
-                }
+                LottieLoadingIndicator()
             }
 
             is UiState.Success -> {
                 CollectionTabContent(collection = state.data, onCollectionClick = { collectionId ->
                     navController.navigate(Screen.CollectionDetail.createRoute(collectionId))
+                }, onUserClick = {
+                    navController.navigate(Screen.Profile.createRoute(it))
                 })
             }
 
             is UiState.Error -> {
                 Text(
-                    text = state.message ?: "Unknown error",
+                    text = state.message,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -250,7 +263,8 @@ fun CollectionScreen(navController: NavController, viewModel: HomeViewModel = hi
 @Composable
 fun CollectionTabContent(
     collection: List<CollectionResponse>,
-    onCollectionClick: (String) -> Unit
+    onCollectionClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
 
     LazyColumn(
@@ -261,7 +275,10 @@ fun CollectionTabContent(
             items = collection,
             key = { collection -> collection.id }
         ) { collection ->
-            CollectionListItem(collection = collection, onItemClick = onCollectionClick)
+            CollectionListItem(
+                collection = collection, onItemClick = onCollectionClick,
+                onUserClick = onUserClick
+            )
         }
     }
 
