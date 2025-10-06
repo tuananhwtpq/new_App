@@ -4,9 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.myapp.MainViewModel
 import com.example.myapp.ui.detail.DetailScreen
 import com.example.myapp.ui.home.HomeScreen
@@ -18,7 +20,9 @@ sealed class Screen(val route: String) {
     object Search : Screen("search")
     object Collection : Screen("collection")
     object Profile : Screen("profile")
-    object Detail: Screen("detail")
+    object Detail: Screen("detail/{photoId}"){
+        fun createRoute(photoId: String) = "detail/$photoId"
+    }
 }
 
 @Composable
@@ -37,9 +41,15 @@ fun Navigation(modifier: Modifier) {
             )
         }
 
-        composable(Screen.Detail.route) {
+        composable(
+            route = Screen.Detail.route,
+            arguments = listOf(navArgument("photoId") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val photoId = backStackEntry.arguments?.getString("photoId")
             DetailScreen(
-                navController = navController
+                navController = navController,
+                photoId = photoId
             )
         }
 

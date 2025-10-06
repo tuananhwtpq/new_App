@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ModalBottomSheet
 import com.example.myapp.data.model.CollectionResponse
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.CollectionListItem
 
 
@@ -77,38 +78,10 @@ fun HomeScreen(
                 when (page) {
                     //Photo Screen
                     0 -> {
-                        when (val state = uiState) {
-                            is UiState.Error -> {
-                                Text(
-                                    text = state.message ?: "Unknown error",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            is UiState.Init -> {
-
-                            }
-
-                            is UiState.Loading -> {
-
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                    )
-                                }
-
-                            }
-
-                            is UiState.Success -> {
-                                HomeTabContent(photos = state.data, onPhotoClick = {
-                                    // navController.navigate("photoDetail/${it}")
-                                })
-                            }
-                        }
+                        PhotoScreen(
+                            navController = navController,
+                            viewModel = homeViewModel
+                        )
                     }
                     // Collection Screen
                     1 -> {
@@ -139,7 +112,7 @@ fun HomeTabContent(photos: List<PhotoResponse>, onPhotoClick: (String) -> Unit) 
 }
 
 @Composable
-fun PhotoScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun PhotoScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     val uiState by viewModel.photoList.collectAsState()
 
     when (val state = uiState) {
@@ -157,8 +130,8 @@ fun PhotoScreen(viewModel: HomeViewModel = hiltViewModel()) {
         }
 
         is UiState.Success -> {
-            HomeTabContent(photos = state.data, onPhotoClick = {
-                // navController.navigate("photoDetail/${it}")
+            HomeTabContent(photos = state.data, onPhotoClick = { photoId ->
+                navController.navigate(Screen.Detail.createRoute(photoId))
             })
         }
 
