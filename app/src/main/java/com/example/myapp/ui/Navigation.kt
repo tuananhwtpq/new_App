@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.myapp.MainViewModel
+import com.example.myapp.ui.detail.CollectionDetailScreen
 import com.example.myapp.ui.detail.DetailScreen
 import com.example.myapp.ui.home.HomeScreen
 import com.example.myapp.ui.home.HomeViewModel
@@ -20,8 +21,12 @@ sealed class Screen(val route: String) {
     object Search : Screen("search")
     object Collection : Screen("collection")
     object Profile : Screen("profile")
-    object Detail: Screen("detail/{photoId}"){
+    object Detail : Screen("detail/{photoId}") {
         fun createRoute(photoId: String) = "detail/$photoId"
+    }
+
+    object CollectionDetail : Screen("collectionDetail/{collectionId}") {
+        fun createRoute(collectionId: String) = "collectionDetail/$collectionId"
     }
 }
 
@@ -51,6 +56,17 @@ fun Navigation(modifier: Modifier) {
                 navController = navController,
                 photoId = photoId
             )
+        }
+
+        composable(
+            route = Screen.CollectionDetail.route,
+            arguments = listOf(navArgument("collectionId") { type = NavType.StringType })
+        ) {
+
+            CollectionDetailScreen(
+                navController = navController,
+            )
+
         }
 
     }

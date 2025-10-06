@@ -24,10 +24,12 @@ interface UnsplashApiService {
         @Query("per_page") perPage: Int
     ): List<CollectionResponse>
 
-    @GET("/collections/{id}")
-    suspend fun getPrivateCollections(
-        @Query("id") id: String
-    ): List<CollectionResponse>
+    @GET("/collections/{id}/photos")
+    suspend fun getCollectionPhotos(
+        @Path("id") id: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): List<PhotoResponse>
 
     @GET("/users/{username}")
     suspend fun getPublicProfile(
@@ -39,18 +41,7 @@ interface UnsplashApiService {
         @Path("id") id: String
     ): PhotoResponse
 
-    /**
-     * Tìm kiếm ảnh theo một query.
-     * @param query Từ khóa tìm kiếm (bắt buộc).
-     * @param page Số trang (tùy chọn).
-     * @param perPage Số lượng item trên mỗi trang (tùy chọn).
-     * @param orderBy Cách sắp xếp (tùy chọn, ví dụ: 'latest' hoặc 'relevant').
-     * @param collections Lọc theo ID của collection (tùy chọn).
-     * @param contentFilter Lọc nội dung an toàn (tùy chọn, 'low' hoặc 'high').
-     * @param color Lọc theo màu sắc (tùy chọn).
-     * @param orientation Lọc theo hướng ảnh (tùy chọn, 'landscape', 'portrait', 'squarish').
-     * @param lang Ngôn ngữ của query (tùy chọn).
-     */
+
     @GET("/search/photos")
     suspend fun searchPhotos(
         @Query("query") query: String,

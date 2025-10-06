@@ -222,8 +222,8 @@ fun CollectionScreen(navController: NavController, viewModel: HomeViewModel = hi
             }
 
             is UiState.Success -> {
-                CollectionTabContent(collection = state.data, onCollectionClick = {
-                    // navController.navigate("photoDetail/${it}")
+                CollectionTabContent(collection = state.data, onCollectionClick = { collectionId ->
+                    navController.navigate(Screen.CollectionDetail.createRoute(collectionId))
                 })
             }
 
@@ -259,7 +259,6 @@ fun CollectionTabContent(
     }
 
 }
-
 
 @Preview(showBackground = true)
 @Composable

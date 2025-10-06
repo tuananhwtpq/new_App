@@ -98,7 +98,6 @@ fun PhotoListItem(
             )
         }
 
-
     }
 }
 

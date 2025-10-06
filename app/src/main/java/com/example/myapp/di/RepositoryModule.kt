@@ -35,4 +35,5 @@ abstract class RepositoryModule {
         homeItemDetailRepositoryImpl: HomeItemDetailRepositoryImpl
     ): HomeItemDetailRepository
 
+
 }

@@ -27,23 +27,36 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapp.data.model.PhotoResponse
+import com.example.myapp.data.model.PhotoUrl
+import com.example.myapp.data.model.ProfileImage
+import com.example.myapp.data.model.User
+import com.example.myapp.ui.theme.MyAppTheme
+import androidx.compose.foundation.lazy.items
+import androidx.room.util.TableInfo
+import com.example.myapp.data.model.Tag
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PhotoDetailContent(
     photo: PhotoResponse,
-    navController: NavController
+    navController: NavController,
+    placeholder: Painter? = null
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -57,6 +70,8 @@ fun PhotoDetailContent(
                 AsyncImage(
                     model = photo.urls?.regular,
                     contentDescription = photo.description,
+                    placeholder = placeholder,
+                    error = placeholder,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -105,6 +120,8 @@ fun PhotoDetailContent(
                 AsyncImage(
                     model = photo.user?.profile_image?.medium,
                     contentDescription = "User Avatar",
+                    placeholder = placeholder,
+                    error = placeholder,
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
@@ -149,7 +166,7 @@ fun PhotoDetailContent(
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     InfoItem("Camera", photo.exif?.model ?: "N/A")
                     InfoItem("Focal Length", photo.exif?.focal_length ?: "N/A")
@@ -181,12 +198,31 @@ fun PhotoDetailContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                InfoItem("Views", photo.downloads?.toString() ?: "0")
-                InfoItem("Downloads", photo.downloads?.toString() ?: "0")
-                InfoItem("Likes", photo.likes?.toString() ?: "0")
+
+                Column(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    InfoItem("Views", photo.downloads?.toString() ?: "0")
+                }
+
+                Column(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    InfoItem("Downloads", photo.downloads?.toString() ?: "0")
+                }
+
+                Column(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    InfoItem("Likes", photo.likes?.toString() ?: "0")
+                }
+
             }
         }
 
@@ -197,23 +233,27 @@ fun PhotoDetailContent(
                 thickness = 1.dp,
                 color = Color.LightGray
             )
+
+//            Spacer(
+//                modifier = Modifier.padding(6.dp)
+//            )
         }
 
-//        item {
-//            LazyRow(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 16.dp),
-//                horizontalArrangement = Arrangement.spacedBy(8.dp),
-//            ) {
-//                items(
-//                    items = photo.tags.orEmpty(),
-//                    key = { it.title ?: "" }
-//                ) { tag ->
-//                    TagChip(text = tag.title ?: "")
-//                }
-//            }
-//        }
+        item {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(
+                    items = photo.tags.orEmpty(),
+                    key = { it.title ?: "" }
+                ) { tag ->
+                    TagChip(text = tag.title ?: "")
+                }
+            }
+        }
 
         item {
             Spacer(modifier = Modifier.height(100.dp))
@@ -221,3 +261,78 @@ fun PhotoDetailContent(
     }
 }
 
+
+@Preview
+@Composable
+fun PhotoDetailContent() {
+
+    val newUser = User(
+        id = "2",
+        name = "Tuan Anh",
+        username = "Tuan Anh",
+        profile_image = ProfileImage(
+            small = null,
+            medium = "https://res.cloudinary.com/dguxc4au3/image/upload/v1754787853/78b303974d8b705c370d57a9f9bd48ca_gwxnbs.jpg",
+            large = null
+        ),
+        first_name = null,
+        last_name = null,
+        twitter_username = null,
+        portfolio_url = null,
+        bio = null,
+        location = null,
+        instagram_username = null,
+        total_collections = null,
+        total_likes = null,
+        total_photos = null,
+        downloads = null,
+        social = null
+    )
+
+    val fakeTag = listOf<Tag>(
+        Tag("Tuan Anh"),
+        Tag("Hi Anh"),
+        Tag("Ba Anh"),
+        Tag("Bon Anh"),
+        Tag("Tuan Anh"),
+        Tag("Hi Anh"),
+        Tag("Ba Anh"),
+        Tag("Bon Anh"),
+    )
+
+
+    val fakePhoto = PhotoResponse(
+        id = "2",
+        description = null,
+        urls = PhotoUrl(
+            raw = "",
+            full = "",
+            regular = "https://res.cloudinary.com/dguxc4au3/image/upload/v1754787853/78b303974d8b705c370d57a9f9bd48ca_gwxnbs.jpg",
+            small = "",
+            thumb = null,
+            small_s3 = null
+        ),
+        user = newUser,
+        downloads = 0,
+        likes = 0,
+        exif = null,
+        tags = fakeTag,
+        width = 3000,
+        height = 6000
+    )
+
+    MyAppTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+
+            val imageHolder = ColorPainter(MaterialTheme.colorScheme.surfaceVariant)
+
+            PhotoDetailContent(
+                photo = fakePhoto,
+                navController = NavController(LocalContext.current),
+                placeholder = imageHolder
+            )
+        }
+    }
+
+
+}

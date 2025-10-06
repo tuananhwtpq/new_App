@@ -1,5 +1,6 @@
 package com.example.myapp.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,13 +21,17 @@ import com.example.myapp.ui.theme.MyAppTheme
 fun InfoItem(title: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text(text = title, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        Text(
+            text = title, style = MaterialTheme.typography.bodySmall, color = Color.Gray,
+            fontWeight = FontWeight.Bold
+        )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
+            color = Color.Gray
         )
     }
 }

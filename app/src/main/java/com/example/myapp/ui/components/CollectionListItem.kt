@@ -1,10 +1,12 @@
 package com.example.myapp.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -81,15 +84,38 @@ fun CollectionListItem(
             shape = RoundedCornerShape(16.dp),
 
             ) {
-            AsyncImage(
-                model = collection.cover_photo?.urls?.full,
-                contentDescription = collection.description ?: "Unknown collection",
-                placeholder = placeholder,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Crop
 
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                AsyncImage(
+                    model = collection.cover_photo?.urls?.regular,
+                    contentDescription = collection.description ?: "Unknown collection",
+                    placeholder = placeholder,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentScale = ContentScale.Crop
+
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = collection.title ?: "Untitled Collection",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${collection.total_photos ?: 0} Photos",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            
         }
 
     }
