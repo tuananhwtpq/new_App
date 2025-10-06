@@ -1,0 +1,10 @@
+package com.example.myapp.repository
+
+import com.example.myapp.data.model.PhotoResponse
+import com.example.myapp.data.model.User
+
+interface UserRepository {
+
+    suspend fun getUserProfile(username: String): Result<User>
+    suspend fun getUserPhotos(username: String, page: Int): Result<List<PhotoResponse>>
+}

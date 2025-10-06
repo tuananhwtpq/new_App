@@ -22,22 +22,47 @@ class CollectionDetailViewModel @Inject constructor(
     saveStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _collectionList =
+    private val _photoList =
         MutableStateFlow<UiState<List<PhotoResponse>>>(UiState.Loading)
-    val collectionList: StateFlow<UiState<List<PhotoResponse>>> = _collectionList.asStateFlow()
+    val collectionList: StateFlow<UiState<List<PhotoResponse>>> = _photoList.asStateFlow()
+
+    private val _collectionInfo = MutableStateFlow<UiState<CollectionResponse>>(UiState.Loading)
+    val collectionInfo: StateFlow<UiState<CollectionResponse>> = _collectionInfo.asStateFlow()
 
     private val collectionId = saveStateHandle.get<String>("collectionId")
 
     init {
         if (collectionId != null) {
             fetchCollections()
+            fetchCollectionInfo()
         }
     }
+
+    fun fetchCollectionInfo() {
+        viewModelScope.launch {
+            _collectionInfo.value = UiState.Loading
+            try {
+
+                val result = collectionRepository.getCollection(id = collectionId.toString())
+                result.onSuccess {
+                    _collectionInfo.value = UiState.Success(it)
+                }
+                    .onFailure {
+                        _collectionInfo.value =
+                            UiState.Error("Lỗi không lấy được Collection info: ${it.message}")
+                    }
+
+            } catch (e: Exception) {
+                _collectionInfo.value = UiState.Error("Ngoại lệ: ${e.message}")
+            }
+        }
+    }
+
 
     fun fetchCollections() {
 
         viewModelScope.launch {
-            _collectionList.value = UiState.Loading
+            _photoList.value = UiState.Loading
 
             try {
                 val collections =
@@ -48,13 +73,13 @@ class CollectionDetailViewModel @Inject constructor(
                     )
 
                 collections.onSuccess {
-                    _collectionList.value = UiState.Success(it)
+                    _photoList.value = UiState.Success(it)
                 }.onFailure {
-                    _collectionList.value = UiState.Error(it.message ?: "Unknown error")
+                    _photoList.value = UiState.Error(it.message ?: "Unknown error")
                     Log.e("CollectionDetailViewModel", "Error fetching collections: ${it.message}")
                 }
             } catch (e: Exception) {
-                _collectionList.value = UiState.Error(e.message ?: "Unknown error")
+                _photoList.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
 

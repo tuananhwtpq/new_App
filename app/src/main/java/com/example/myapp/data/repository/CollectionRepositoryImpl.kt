@@ -41,4 +41,15 @@ class CollectionRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getCollection(id: String): Result<CollectionResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val collection = apiService.getCollectionById(id)
+                Result.success(collection)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
 }

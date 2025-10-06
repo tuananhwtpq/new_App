@@ -1,6 +1,7 @@
 package com.example.myapp.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.internal.composableLambdaInstance
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -14,13 +15,17 @@ import com.example.myapp.ui.detail.CollectionDetailScreen
 import com.example.myapp.ui.detail.DetailScreen
 import com.example.myapp.ui.home.HomeScreen
 import com.example.myapp.ui.home.HomeViewModel
+import com.example.myapp.ui.profile.UserProfileScreen
 
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Search : Screen("search")
     object Collection : Screen("collection")
-    object Profile : Screen("profile")
+    object Profile : Screen("profile/{username}") {
+        fun createRoute(username: String) = "profile/$username"
+    }
+
     object Detail : Screen("detail/{photoId}") {
         fun createRoute(photoId: String) = "detail/$photoId"
     }
@@ -67,6 +72,15 @@ fun Navigation(modifier: Modifier) {
                 navController = navController,
             )
 
+        }
+
+        composable(
+            route = Screen.Profile.route,
+            arguments = listOf(navArgument("username") { type = NavType.StringType })
+        ) {
+            UserProfileScreen(
+                navController = navController
+            )
         }
 
     }

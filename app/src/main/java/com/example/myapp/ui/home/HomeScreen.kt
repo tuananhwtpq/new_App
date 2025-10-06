@@ -144,7 +144,14 @@ fun HomeTabContent(photos: List<PhotoResponse>, onPhotoClick: (String) -> Unit) 
             items = photos,
             key = { photo -> photo.id }
         ) { photo ->
-            PhotoListItem(photo = photo, onItemClick = onPhotoClick)
+            PhotoListItem(
+                photo = photo, onItemClick = onPhotoClick,
+                placeholder = null,
+                onUserClick = {}
+//                onUserClick = {username ->
+//                    navController.navigate(Screen.Profile.createRoute(username))
+//                }
+            )
 
         }
     }
