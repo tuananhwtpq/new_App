@@ -1,6 +1,7 @@
 package com.example.myapp.ui.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.FabPosition
@@ -46,7 +50,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +67,20 @@ import com.example.myapp.ui.theme.MyAppTheme
 import com.example.myapp.utils.UiState
 import kotlinx.coroutines.launch
 import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.Surface
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.LineHeightStyle
+import com.example.myapp.R
+import java.nio.file.WatchEvent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -80,9 +97,7 @@ fun HomeScreen(
     val sortOptions = listOf("Latest", "Oldest", "Popular")
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
 
-    //val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-
-
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     if (showSortDialog) {
         AlertDialog(
             onDismissRequest = { showSortDialog = false },
@@ -131,90 +146,106 @@ fun HomeScreen(
         )
     }
 
-
-    Scaffold(
-        topBar = {
-            TabRow(
-                selectedTabIndex = pageState.currentPage,
-                modifier = Modifier.statusBarsPadding(),
-                backgroundColor = Color.White
-            ) {
-                tabTitles.forEachIndexed { index, title ->
-                    Tab(
-                        selected = pageState.currentPage == index,
-                        onClick = {
-                            coroutineScope.launch {
-                                pageState.animateScrollToPage(index)
-                            }
-                        },
-                        text = { Text(text = title, color = Color.Black) }
-                    )
-                }
-            }
-        },
-
-
-        floatingActionButtonPosition = FabPosition.Center,
-        isFloatingActionButtonDocked = true,
-
-        floatingActionButton = {
-            FloatingActionButton(
-                shape = CircleShape,
-                onClick = {  },
-                backgroundColor = Color.Black
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
-            }
-        },
-
-        bottomBar = {
-            BottomAppBar(
-                cutoutShape = CircleShape,
-                backgroundColor = Color.White,
-                elevation = 8.dp
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Row {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-                    }
-
-                    Row {
-                        IconButton(onClick = {
-                            navController.navigate(Screen.Search.route)
-                        }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        }
-                        IconButton(onClick = {
-                            showSortDialog = true
-                        }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More Options")
-                        }
-                    }
-                }
-            }
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetContent = {
+            BottomSheetContent()
         }
 
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            HorizontalPager(state = pageState) { page ->
-                when (page) {
-                    //Photo Screen
-                    0 -> {
-                        PhotoScreen(navController = navController, viewModel = homeViewModel)
+    ) {
+
+        Scaffold(
+            topBar = {
+                TabRow(
+                    selectedTabIndex = pageState.currentPage,
+                    modifier = Modifier.statusBarsPadding(),
+                    backgroundColor = Color.White
+                ) {
+                    tabTitles.forEachIndexed { index, title ->
+                        Tab(
+                            selected = pageState.currentPage == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    pageState.animateScrollToPage(index)
+                                }
+                            },
+                            text = { Text(text = title, color = Color.Black) }
+                        )
                     }
-                    // Collection Screen
-                    1 -> {
-                        CollectionScreen(navController = navController, viewModel = homeViewModel)
+                }
+            },
+
+
+            floatingActionButtonPosition = FabPosition.Center,
+            isFloatingActionButtonDocked = true,
+
+            floatingActionButton = {
+                FloatingActionButton(
+                    shape = CircleShape,
+                    onClick = { },
+                    backgroundColor = Color.Black
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
+                }
+            },
+
+            bottomBar = {
+                BottomAppBar(
+                    cutoutShape = CircleShape,
+                    backgroundColor = Color.White,
+                    elevation = 8.dp
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Row {
+                            IconButton(onClick = {
+                                coroutineScope.launch {
+                                    sheetState.show()
+                                }
+                            }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            }
+                        }
+
+                        Row {
+                            IconButton(onClick = {
+                                navController.navigate(Screen.Search.route)
+                            }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                            IconButton(onClick = {
+                                showSortDialog = true
+                            }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                            }
+                        }
+                    }
+                }
+            }
+
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                HorizontalPager(state = pageState) { page ->
+                    when (page) {
+                        //Photo Screen
+                        0 -> {
+                            PhotoScreen(navController = navController, viewModel = homeViewModel)
+                        }
+                        // Collection Screen
+                        1 -> {
+                            CollectionScreen(
+                                navController = navController,
+                                viewModel = homeViewModel
+                            )
+                        }
                     }
                 }
             }
@@ -353,6 +384,70 @@ fun CollectionTabContent(
 
 }
 
+@Composable
+fun BottomSheetContent() {
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(4.dp)
+                .clip(CircleShape)
+                .background(Color.Gray)
+                .align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painterResource(id = R.drawable.logo),
+                contentDescription = "App Icon",
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text("Resplash_Clone", style = MaterialTheme.typography.bodyMedium)
+                Text("Powered by creators everywhere", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+        BottomSheetMenuItem(icon = Icons.Default.Settings, text = "Auto Wallpaper")
+        BottomSheetMenuItem(icon = Icons.Default.Star, text = "Upgrade to Resplash Pro")
+        BottomSheetMenuItem(icon = Icons.Default.Settings, text = "Settings")
+        BottomSheetMenuItem(icon = Icons.Default.Info, text = "About")
+    }
+
+}
+
+@Composable
+fun BottomSheetMenuItem(icon: ImageVector, text: String) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {}
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Icon(imageVector = icon, contentDescription = text, tint = Color.Gray)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text)
+
+    }
+
+}
+
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
@@ -369,4 +464,17 @@ fun HomeScreenPreview() {
         }
     }
 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BottomSheetContentPreview() {
+    MyAppTheme {
+        Surface(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            BottomSheetContent()
+
+        }
+    }
 }
