@@ -20,6 +20,9 @@ class HomeViewModel @Inject constructor(
     private val collectionRepository: CollectionRepository
 ) : ViewModel() {
 
+    private var currentPhotoPage = 1
+    private var currentCollectionPage = 1
+
     private val _photoList = MutableStateFlow<UiState<List<PhotoResponse>>>(UiState.Loading)
     val photoList: StateFlow<UiState<List<PhotoResponse>>> = _photoList.asStateFlow()
 
@@ -27,41 +30,72 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow<UiState<List<CollectionResponse>>>(UiState.Loading)
     val collectionList: StateFlow<UiState<List<CollectionResponse>>> = _collectionList.asStateFlow()
 
+    private val _isRefreshingPhoto = MutableStateFlow(false)
+    val isRefreshingPhoto: StateFlow<Boolean> = _isRefreshingPhoto.asStateFlow()
 
-    private var currentPage = 1
+    private val _isRefreshingCollection = MutableStateFlow(false)
+    val isRefreshingCollection: StateFlow<Boolean> = _isRefreshingCollection.asStateFlow()
 
     init {
         fetchPhotos()
         getAllCollections()
     }
 
-    fun fetchPhotos() {
-        viewModelScope.launch {
-            _photoList.value = UiState.Loading
+    fun refreshPhoto() {
+        currentPhotoPage = 1
+        fetchPhotos(isRefreshing = true)
+    }
 
-            val result = repository.getAllPhotos(currentPage, 100)
+    fun refreshCollection() {
+        currentCollectionPage = 1
+        getAllCollections(isRefreshing = true)
+    }
+
+    fun sortPhotos(orderBy: String) {
+        currentPhotoPage = 1
+        fetchPhotos(isRefreshing = true, orderBy = orderBy)
+    }
+
+
+    fun fetchPhotos(isRefreshing: Boolean = false, orderBy: String = "latest") {
+        viewModelScope.launch {
+
+            if (!isRefreshing) {
+                _photoList.value = UiState.Loading
+            } else {
+                _isRefreshingPhoto.value = true
+            }
+
+            val result = repository.getAllPhotos(currentPhotoPage, 20, orderBy)
             result.onSuccess {
                 _photoList.value = UiState.Success(it)
-                currentPage++
+                currentPhotoPage++
             }.onFailure {
                 _photoList.value = UiState.Error(
                     "Lỗi không lấy được dữ liệu HomeViewModel: ${it.message}" ?: "Unknown error"
                 )
             }
+
+            _isRefreshingPhoto.value = false
         }
     }
 
-    fun getAllCollections() {
+    fun getAllCollections(isRefreshing: Boolean = false) {
         viewModelScope.launch {
-            _collectionList.value = UiState.Loading
+
+            if (!isRefreshing) {
+                _collectionList.value = UiState.Loading
+            } else {
+                _isRefreshingCollection.value = true
+            }
 
             try {
 
-                val result = collectionRepository.getAllCollections(currentPage, 20)
+                val result = collectionRepository.getAllCollections(currentCollectionPage, 20)
 
                 result.onSuccess {
                     _collectionList.value = UiState.Success(it)
-                    currentPage++
+                    currentCollectionPage++
                 }
                     .onFailure {
                         _collectionList.value = UiState.Error(
@@ -73,6 +107,8 @@ class HomeViewModel @Inject constructor(
             } catch (e: Exception) {
                 _collectionList.value =
                     UiState.Error("Lỗi không lấy được dữ liệu CollectionViewModel: ${e.message}")
+            } finally {
+                _isRefreshingCollection.value = false
             }
         }
     }

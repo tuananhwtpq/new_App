@@ -44,7 +44,8 @@ import java.nio.file.WatchEvent
 fun PhotoListItem(
     photo: PhotoResponse,
     onItemClick: (String) -> Unit,
-    placeholder: Painter? = null
+    placeholder: Painter? = null,
+    onUserClick: (String) -> Unit
 ) {
 
 
@@ -55,7 +56,11 @@ fun PhotoListItem(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable {
+                    photo.user?.username.let { onUserClick(it.toString()) }
+                    //photo.user?.profile_image.let { onUserClick(it.toString()) }
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -97,7 +102,6 @@ fun PhotoListItem(
 
             )
         }
-
 
     }
 }
@@ -162,7 +166,8 @@ fun PhotoListItemPreview() {
             PhotoListItem(
                 photo = fakePhoto,
                 onItemClick = {},
-                placeholder = imageHolder
+                placeholder = imageHolder,
+                onUserClick = {}
             )
         }
 

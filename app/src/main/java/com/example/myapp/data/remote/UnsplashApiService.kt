@@ -15,7 +15,9 @@ interface UnsplashApiService {
     @GET("/photos")
     suspend fun getAllPhotos(
         @Query("page") page: Int,
-        @Query("per_page") perPage: Int
+        @Query("per_page") perPage: Int,
+        @Query("order_by") orderBy: String?
+
     ): List<PhotoResponse>
 
     @GET("/collections")
@@ -25,9 +27,16 @@ interface UnsplashApiService {
     ): List<CollectionResponse>
 
     @GET("/collections/{id}")
-    suspend fun getPrivateCollections(
-        @Query("id") id: String
-    ): List<CollectionResponse>
+    suspend fun getCollectionById(
+        @Path("id") id: String
+    ): CollectionResponse
+
+    @GET("/collections/{id}/photos")
+    suspend fun getCollectionPhotos(
+        @Path("id") id: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): List<PhotoResponse>
 
     @GET("/users/{username}")
     suspend fun getPublicProfile(
@@ -39,18 +48,7 @@ interface UnsplashApiService {
         @Path("id") id: String
     ): PhotoResponse
 
-    /**
-     * Tìm kiếm ảnh theo một query.
-     * @param query Từ khóa tìm kiếm (bắt buộc).
-     * @param page Số trang (tùy chọn).
-     * @param perPage Số lượng item trên mỗi trang (tùy chọn).
-     * @param orderBy Cách sắp xếp (tùy chọn, ví dụ: 'latest' hoặc 'relevant').
-     * @param collections Lọc theo ID của collection (tùy chọn).
-     * @param contentFilter Lọc nội dung an toàn (tùy chọn, 'low' hoặc 'high').
-     * @param color Lọc theo màu sắc (tùy chọn).
-     * @param orientation Lọc theo hướng ảnh (tùy chọn, 'landscape', 'portrait', 'squarish').
-     * @param lang Ngôn ngữ của query (tùy chọn).
-     */
+
     @GET("/search/photos")
     suspend fun searchPhotos(
         @Query("query") query: String,
@@ -77,4 +75,24 @@ interface UnsplashApiService {
         @Query("page") page: Int? = null,
         @Query("per_page") perPage: Int? = null
     ): SearchUserResponse
+
+    @GET("users/{username}")
+    suspend fun getUserProfile(
+        @Path("username") username: String
+    ): User
+
+    @GET("users/{username}/photos")
+    suspend fun getUserPhotos(
+        @Path("username") username: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): List<PhotoResponse>
+
+    @GET("users/{username}/likes")
+    suspend fun getUserLikes(
+        @Path("username") username: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): List<PhotoResponse>
+
 }

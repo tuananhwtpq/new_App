@@ -1,6 +1,8 @@
 package com.example.myapp.data.repository
 
+import androidx.compose.foundation.layout.Row
 import com.example.myapp.data.model.CollectionResponse
+import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.remote.UnsplashApiService
 import com.example.myapp.repository.CollectionRepository
 import kotlinx.coroutines.Dispatchers
@@ -24,14 +26,30 @@ class CollectionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPrivateCollections(id: String): Result<List<CollectionResponse>> {
+    override suspend fun getCollectionPhotos(
+        id: String,
+        page: Int,
+        perPage: Int
+    ): Result<List<PhotoResponse>> {
         return withContext(Dispatchers.IO) {
             try {
-                val collections = apiService.getPrivateCollections(id)
-                Result.success(collections)
+                val photos = apiService.getCollectionPhotos(id, page, perPage)
+                Result.success(photos)
             } catch (e: Exception) {
                 Result.failure(e)
             }
         }
     }
+
+    override suspend fun getCollection(id: String): Result<CollectionResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val collection = apiService.getCollectionById(id)
+                Result.success(collection)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
 }

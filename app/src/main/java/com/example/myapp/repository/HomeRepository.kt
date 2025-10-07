@@ -5,7 +5,7 @@ import dagger.Binds
 
 interface HomeRepository {
 
-    suspend fun getAllPhotos(page: Int, perPage: Int): Result<List<PhotoResponse>>
+    suspend fun getAllPhotos(page: Int, perPage: Int, orderBy: String?): Result<List<PhotoResponse>>
 
 
 }

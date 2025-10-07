@@ -13,11 +13,12 @@ class HomeRepositoryImpl @Inject constructor(
 ) : HomeRepository {
     override suspend fun getAllPhotos(
         page: Int,
-        perPage: Int
+        perPage: Int,
+        orderBy: String?
     ): Result<List<PhotoResponse>> {
         return withContext(Dispatchers.IO) {
             try {
-                val photoList = apiService.getAllPhotos(page, perPage)
+                val photoList = apiService.getAllPhotos(page, perPage, orderBy)
                 Result.success(photoList)
             } catch (e: Exception) {
                 Result.failure(e)

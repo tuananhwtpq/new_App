@@ -91,6 +91,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.compose.material3:material3")
 
+    implementation("androidx.compose.material:material:1.6.8")
+    implementation("com.airbnb.android:lottie-compose:6.4.1")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.9.2")
+
 
 }
 
