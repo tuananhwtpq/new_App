@@ -1,28 +1,36 @@
 package com.example.myapp.ui.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -34,7 +42,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,7 +63,7 @@ import com.example.myapp.ui.components.PhotoListItem
 import com.example.myapp.ui.theme.MyAppTheme
 import com.example.myapp.utils.UiState
 import kotlinx.coroutines.launch
-
+import androidx.compose.material.ModalBottomSheetLayout
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -64,6 +75,62 @@ fun HomeScreen(
     val uiState by homeViewModel.photoList.collectAsState()
     val pageState = rememberPagerState { tabTitles.size }
     val coroutineScope = rememberCoroutineScope()
+
+    var showSortDialog by remember { mutableStateOf(false) }
+    val sortOptions = listOf("Latest", "Oldest", "Popular")
+    var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
+
+    //val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
+
+    if (showSortDialog) {
+        AlertDialog(
+            onDismissRequest = { showSortDialog = false },
+            title = { Text("Sort by") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    sortOptions.forEach { option ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedSortOption = option
+                                }
+                                .padding(vertical = 8.dp)
+                        ) {
+                            RadioButton(
+                                selected = (option == selectedSortOption),
+                                onClick = {
+                                    selectedSortOption = option
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = option)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSortDialog = false
+                        //homeViewModel.refreshPhoto()
+                        homeViewModel.sortPhotos(selectedSortOption.lowercase())
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSortDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+
 
     Scaffold(
         topBar = {
@@ -93,7 +160,7 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 shape = CircleShape,
-                onClick = { /* TODO: Handle FAB click */ },
+                onClick = {  },
                 backgroundColor = Color.Black
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
@@ -123,7 +190,9 @@ fun HomeScreen(
                         }) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = {
+                            showSortDialog = true
+                        }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More Options")
                         }
                     }

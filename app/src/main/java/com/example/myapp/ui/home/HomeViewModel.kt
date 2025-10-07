@@ -51,8 +51,13 @@ class HomeViewModel @Inject constructor(
         getAllCollections(isRefreshing = true)
     }
 
+    fun sortPhotos(orderBy: String) {
+        currentPhotoPage = 1
+        fetchPhotos(isRefreshing = true, orderBy = orderBy)
+    }
 
-    fun fetchPhotos(isRefreshing: Boolean = false) {
+
+    fun fetchPhotos(isRefreshing: Boolean = false, orderBy: String = "latest") {
         viewModelScope.launch {
 
             if (!isRefreshing) {
@@ -61,7 +66,7 @@ class HomeViewModel @Inject constructor(
                 _isRefreshingPhoto.value = true
             }
 
-            val result = repository.getAllPhotos(currentPhotoPage, 20)
+            val result = repository.getAllPhotos(currentPhotoPage, 20, orderBy)
             result.onSuccess {
                 _photoList.value = UiState.Success(it)
                 currentPhotoPage++
