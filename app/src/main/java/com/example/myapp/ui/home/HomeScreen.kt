@@ -160,11 +160,11 @@ fun HomeScreen(
                                     if (pageState.currentPage == index) {
                                         when (index) {
                                             0 -> {
-                                                photoListState.animateScrollToItem(0)
+                                                photoListState.scrollToItem(0)
                                             }
 
                                             1 -> {
-                                                collectionListState.animateScrollToItem(0)
+                                                collectionListState.scrollToItem(0)
                                             }
                                         }
                                     } else {

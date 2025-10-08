@@ -49,30 +49,37 @@ fun PhotoScreen(
     val isRefreshing by viewModel.isRefreshingPhoto.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
 
-    //val listState = rememberLazyListState()
     var previousScrollOffset by rememberSaveable { mutableStateOf(0) }
 
-    //region SWIPE LIST
+//region SWIPE LIST
     LaunchedEffect(listState) {
+        var previousIndex = listState.firstVisibleItemIndex
+        var previousOffset = listState.firstVisibleItemScrollOffset
 
-        var lastVisible by mutableStateOf(true)
-
-        snapshotFlow { listState.firstVisibleItemScrollOffset }
-            .map { it to (listState.firstVisibleItemIndex == 0) }
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
             .distinctUntilChanged()
-            .collect { (currentOffset, isAtTop) ->
-                if (isAtTop) {
+            .collect { (currentIndex, currentOffset) ->
+                if (currentIndex == 0 && currentOffset == 0) {
                     onScroll(true)
-                } else {
-                    val scrollDelta = currentOffset - previousScrollOffset
-
-                    if (scrollDelta > SCROLL_THRESHOLD) {
-                        onScroll(false)
-                    } else if (abs(scrollDelta) > SCROLL_THRESHOLD) {
-                        onScroll(true)
-                    }
-                    previousScrollOffset = currentOffset
+                } else if (currentIndex > previousIndex) {
+                    onScroll(false)
+                } else if (currentIndex < previousIndex) {
+                    onScroll(true)
                 }
+                // Cuộn trong cùng 1 item
+                else {
+                    val scrollDelta = currentOffset - previousOffset
+                    if (abs(scrollDelta) > SCROLL_THRESHOLD) {
+                        if (scrollDelta > 0) {
+                            onScroll(false)
+                        } else {
+                            onScroll(true)
+                        }
+                    }
+                }
+
+                previousIndex = currentIndex
+                previousOffset = currentOffset
             }
     }
 
@@ -84,7 +91,7 @@ fun PhotoScreen(
             .collect { lastVisibleItemIndex ->
                 if (lastVisibleItemIndex != null) {
                     val totalItemsCount = listState.layoutInfo.totalItemsCount
-                    if (lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0) {
+                    if (lastVisibleItemIndex >= totalItemsCount - 10 && totalItemsCount > 0) {
                         viewModel.loadMorePhotos()
                     }
                 }
