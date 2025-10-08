@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapp.ui.Screen
+import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.components.PhotoListItem
 import com.example.myapp.ui.home.CollectionDetailViewModel
 import com.example.myapp.utils.UiState
@@ -89,7 +90,7 @@ fun CollectionDetailScreen(
         when (val state = uiState) {
             is UiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    LottieLoadingIndicator()
                 }
             }
 

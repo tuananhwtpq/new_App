@@ -56,19 +56,24 @@ import com.example.myapp.utils.UiState
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.ui.components.InfoItem2
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.theme.MyAppTheme
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.TODO
 
-
+//region USER PROFILE SCREEN
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
@@ -79,6 +84,9 @@ fun UserProfileScreen(
     val userProfileState by viewModel.userProfile.collectAsState()
     val userPhotosState by viewModel.userListPhoto.collectAsState()
     val userLikePhoto by viewModel.userLikePhoto.collectAsState()
+    val isLoadingMore by viewModel.isLoadingMore.collectAsState()
+
+    val isLoadingLikePhoto by viewModel.isLoadingLikePhoto.collectAsState()
 
     Scaffold(
         topBar = {
@@ -135,7 +143,11 @@ fun UserProfileScreen(
                     UserProfileContent(
                         user = state.data,
                         photosState = userPhotosState,
-                        userLikePhotoState = userLikePhoto
+                        userLikePhotoState = userLikePhoto,
+                        isLoadingMore = isLoadingMore,
+                        onLoadMorePhotos = { viewModel.loadMorePhoto() },
+                        isLoadingLikePhoto = isLoadingLikePhoto,
+                        onLoadMoreLikePhotos = { viewModel.loadMoreLikePhoto() }
                     )
                 }
 
@@ -143,233 +155,9 @@ fun UserProfileScreen(
             }
         }
     }
-
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun UserProfileContent(
-    user: User,
-    photosState: UiState<List<PhotoResponse>>,
-    userLikePhotoState: UiState<List<PhotoResponse>>
-) {
-    val tabs = remember(user) {
-        mutableListOf("PHOTOS").apply {
-            user.total_likes?.let { if (it > 0) add("LIKES") }
-            user.total_collections?.let { if (it > 0) add("COLLECTIONS") }
-        }
-    }
-    val pagerState = rememberPagerState { tabs.size }
-    val coroutineScope = rememberCoroutineScope()
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                AsyncImage(
-                    model = user.profile_image?.large,
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                )
-                InfoItem2(title = "Photos", value = user.total_photos.toString())
-                InfoItem2(title = "Likes", value = user.total_likes.toString())
-                InfoItem2(title = "Collections", value = user.total_collections.toString())
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = user.name ?: "", fontWeight = FontWeight.Bold)
-            if (!user.location.isNullOrEmpty()) {
-                Text(text = user.location, style = MaterialTheme.typography.bodySmall)
-            }
-            if (!user.bio.isNullOrEmpty()) {
-                Text(
-                    text = user.bio,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        }
-
-        TabRow(selectedTabIndex = pagerState.currentPage) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
-                    text = {
-                        Text(
-                            text = title,
-                            color = Color.Black
-                        )
-                    }
-                )
-            }
-        }
-
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { pageIndex ->
-            when (tabs[pageIndex]) {
-                "PHOTOS" -> {
-                    //val photosState by viewModel.userListPhoto.collectAsState()
-                    UserPhotosGrid(state = photosState)
-                }
-
-                "LIKES" -> {
-//                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-//                        Text("Likes Tab")
-//                    }
-                    UserLikePhoto(state = userLikePhotoState)
-                }
-
-                "COLLECTIONS" -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Collections Tab")
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun UserLikePhoto(state: UiState<List<PhotoResponse>>) {
-
-    when (state) {
-        is UiState.Loading -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
-
-        is UiState.Error -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { Text(state.message) }
-
-        is UiState.Success -> {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(items = state.data, key = { it.id }) { photo ->
-                    Column(modifier = Modifier.padding(bottom = 8.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .clickable {
-                                    // TODO: Handle user click
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AsyncImage(
-                                model = photo.user?.profile_image?.medium,
-                                contentDescription = "User avatar",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = photo.user?.name ?: "Unknown User",
-                                color = Color.Black,
-                            )
-                        }
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            AsyncImage(
-                                model = photo.urls?.regular,
-                                contentDescription = photo.description,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-//                items(items = state.data, key = { it.id }) { photo ->
-//                    Card(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(horizontal = 16.dp, vertical = 8.dp),
-//                        shape = RoundedCornerShape(16.dp),
-//                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-//                    ) {
-//                        AsyncImage(
-//                            model = photo.urls?.regular,
-//                            contentDescription = photo.description,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-//                            contentScale = ContentScale.Crop
-//                        )
-//                    }
-//                }
-
-
-        else -> {}
-    }
-
-}
-
-@Composable
-fun UserPhotosGrid(state: UiState<List<PhotoResponse>>) {
-    when (state) {
-        is UiState.Loading -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
-
-        is UiState.Error -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { Text(state.message ?: "Error") }
-
-        is UiState.Success -> {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(items = state.data, key = { it.id }) { photo ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        AsyncImage(
-                            model = photo.urls?.regular,
-                            contentDescription = photo.description,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-            }
-        }
-
-        else -> {}
-    }
-}
-
+//region PREVIEW
 private val fakeUser = User(
     id = "1",
     username = "fakeuser",
@@ -415,7 +203,11 @@ fun UserProfileContentPreview() {
         UserProfileContent(
             user = fakeUser,
             photosState = UiState.Success(fakePhotos),
-            userLikePhotoState = UiState.Success(fakePhotos)
+            userLikePhotoState = UiState.Success(fakePhotos),
+            isLoadingMore = true,
+            onLoadMorePhotos = { },
+            isLoadingLikePhoto = true,
+            onLoadMoreLikePhotos = { }
         )
     }
 }
@@ -427,7 +219,11 @@ fun UserProfileContentLoadingPreview() {
         UserProfileContent(
             user = fakeUser,
             photosState = UiState.Loading,
-            userLikePhotoState = UiState.Loading
+            userLikePhotoState = UiState.Loading,
+            isLoadingMore = true,
+            onLoadMorePhotos = { },
+            isLoadingLikePhoto = true,
+            onLoadMoreLikePhotos = { }
         )
     }
 }

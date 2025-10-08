@@ -32,17 +32,50 @@ class UserProfileViewModel @Inject constructor(
 
     private val username: String = savedStateHandle.get<String>("username") ?: ""
 
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
+    private val _isLoadingLikePhoto = MutableStateFlow(false)
+    val isLoadingLikePhoto: StateFlow<Boolean> = _isLoadingLikePhoto.asStateFlow()
+
+    private var currentPhotoPage = 1
+    private var currentLikePhotoPage = 1
+
     init {
 
         Log.d("UserProfileViewModel", "Username: $username")
 
         if (username.isNotEmpty()) {
             getUserProfile(username)
-            getUserListPhoto(username, 1)
-            getUserLikePhoto(username, 1)
+            getUserListPhoto(username)
+            getUserLikePhoto(username)
         }
     }
 
+    //region LOAD MORE PHOTO
+    fun loadMorePhoto() {
+        if (_isLoadingMore.value || userListPhoto.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            getUserListPhoto(username)
+            _isLoadingMore.value = false
+        }
+    }
+
+    //region LOAD MORE LIKE PHOTO
+    fun loadMoreLikePhoto() {
+        if (_isLoadingLikePhoto.value || userLikePhoto.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingLikePhoto.value = true
+            getUserLikePhoto(username)
+            _isLoadingLikePhoto.value = false
+        }
+    }
+
+
+    //region GET USER PROFILE
     fun getUserProfile(username: String) {
         viewModelScope.launch {
             _userProfile.value = UiState.Loading
@@ -66,14 +99,25 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    fun getUserListPhoto(username: String, page: Int) {
+    //region GET USER LIST PHOTO
+    fun getUserListPhoto(username: String) {
         viewModelScope.launch {
-            _userListPhoto.value = UiState.Loading
+            if (currentPhotoPage == 1) {
+                _userListPhoto.value = UiState.Loading
+            }
 
             try {
-                val response = userRepository.getUserPhotos(username, page)
-                response.onSuccess {
-                    _userListPhoto.value = UiState.Success(it)
+                val response = userRepository.getUserPhotos(username, currentPhotoPage, 20)
+                response.onSuccess { newPhotos ->
+
+                    if (currentPhotoPage == 1) {
+                        _userListPhoto.value = UiState.Success(newPhotos)
+                    } else {
+                        val currentList =
+                            (_userListPhoto.value as? UiState.Success)?.data ?: emptyList()
+                        _userListPhoto.value = UiState.Success(currentList + newPhotos)
+                    }
+                    currentPhotoPage++
                 }
                     .onFailure {
                         _userListPhoto.value = UiState.Error(
@@ -88,14 +132,27 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    fun getUserLikePhoto(username: String, page: Int) {
+    //region GET USER LIKE PHOTO
+    fun getUserLikePhoto(username: String) {
         viewModelScope.launch {
-            _userLikePhoto.value = UiState.Loading
+            if (currentLikePhotoPage == 1) {
+                _userLikePhoto.value = UiState.Loading
+            }
 
             try {
-                val response = userRepository.getUserLikePhoto(username, page)
-                response.onSuccess {
-                    _userLikePhoto.value = UiState.Success(it)
+                val response =
+                    userRepository.getUserLikePhoto(username, currentLikePhotoPage, perPage = 20)
+                response.onSuccess { newLikedPhotos ->
+
+                    if (currentLikePhotoPage == 1) {
+                        _userLikePhoto.value = UiState.Success(newLikedPhotos)
+                    } else {
+                        val currentList =
+                            (_userLikePhoto.value as? UiState.Success)?.data ?: emptyList()
+                        _userLikePhoto.value = UiState.Success(currentList + newLikedPhotos)
+
+                    }
+                    currentLikePhotoPage++
                 }
                     .onFailure {
                         _userLikePhoto.value = UiState.Error(
