@@ -60,15 +60,23 @@ class HomeViewModel @Inject constructor(
     fun fetchPhotos(isRefreshing: Boolean = false, orderBy: String = "latest") {
         viewModelScope.launch {
 
-            if (!isRefreshing) {
+            if (_photoList.value.data.isNullOrEmpty()) {
                 _photoList.value = UiState.Loading
-            } else {
+            }
+
+            if (isRefreshing) {
                 _isRefreshingPhoto.value = true
             }
 
             val result = repository.getAllPhotos(currentPhotoPage, 20, orderBy)
-            result.onSuccess {
-                _photoList.value = UiState.Success(it)
+            result.onSuccess { newPhotos ->
+                if (currentPhotoPage == 1) {
+                    _photoList.value = UiState.Success(newPhotos)
+                } else {
+                    val currentList =
+                        (_photoList.value as UiState.Success).data.toMutableList() ?: emptyList()
+                    _photoList.value = UiState.Success(currentList + newPhotos)
+                }
                 currentPhotoPage++
             }.onFailure {
                 _photoList.value = UiState.Error(
@@ -113,5 +121,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
 }
+
+val <T> UiState<T>.data: T?
+    get() = (this as? UiState.Success)?.data

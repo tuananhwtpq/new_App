@@ -9,6 +9,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.components.PhotoListItem
 import com.example.myapp.utils.UiState
@@ -36,16 +37,22 @@ fun SearchPhotosPage(
                 items(items = state.data.results, key = { it.id }) { photo ->
                     PhotoListItem(
                         photo = photo,
-                        onItemClick = {  },
-                        onUserClick = {  }
+                        onItemClick = {
+                            navController.navigate(Screen.Detail.createRoute(photo.id))
+                        },
+                        onUserClick = {
+                            navController.navigate(Screen.Profile.createRoute(photo.user?.username.toString()))
+                        }
                     )
                 }
             }
         }
+
         is UiState.Loading -> {
             LottieLoadingIndicator()
         }
-        is UiState.Error -> {  }
+
+        is UiState.Error -> {}
         is UiState.Init -> {
             EmptyState()
         }

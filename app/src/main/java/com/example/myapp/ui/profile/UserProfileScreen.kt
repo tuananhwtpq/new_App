@@ -65,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.ui.components.InfoItem2
+import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.theme.MyAppTheme
 
 
@@ -128,7 +129,7 @@ fun UserProfileScreen(
             contentAlignment = Alignment.Center
         ) {
             when (val state = userProfileState) {
-                is UiState.Loading -> CircularProgressIndicator()
+                is UiState.Loading -> LottieLoadingIndicator()
                 is UiState.Error -> Text(state.message ?: "Error")
                 is UiState.Success -> {
                     UserProfileContent(

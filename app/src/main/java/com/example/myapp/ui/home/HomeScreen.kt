@@ -98,6 +98,8 @@ fun HomeScreen(
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
 
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
+    //region ALERT DIALOG
     if (showSortDialog) {
         AlertDialog(
             onDismissRequest = { showSortDialog = false },
@@ -146,6 +148,7 @@ fun HomeScreen(
         )
     }
 
+    //region MODAL BOTTOM SHEET
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
@@ -157,6 +160,7 @@ fun HomeScreen(
 
         Scaffold(
             topBar = {
+                //region TOPBAR
                 TabRow(
                     selectedTabIndex = pageState.currentPage,
                     modifier = Modifier.statusBarsPadding(),
@@ -176,7 +180,7 @@ fun HomeScreen(
                 }
             },
 
-
+            //region FAB
             floatingActionButtonPosition = FabPosition.Center,
             isFloatingActionButtonDocked = true,
 
@@ -189,6 +193,8 @@ fun HomeScreen(
                     Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
                 }
             },
+
+            //region BOTTOM BAR
 
             bottomBar = {
                 BottomAppBar(
@@ -228,6 +234,7 @@ fun HomeScreen(
             }
 
         ) { paddingValues ->
+            //region CONTENT
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -253,6 +260,7 @@ fun HomeScreen(
     }
 }
 
+//region HOMETABCONTENT
 @Composable
 fun HomeTabContent(
     photos: List<PhotoResponse>,
@@ -279,6 +287,8 @@ fun HomeTabContent(
         }
     }
 }
+
+//region PHOTOSCREEN
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -322,6 +332,8 @@ fun PhotoScreen(navController: NavController, viewModel: HomeViewModel = hiltVie
 
 }
 
+
+//region COLLECTION SCREEN
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
@@ -360,6 +372,7 @@ fun CollectionScreen(navController: NavController, viewModel: HomeViewModel = hi
 }
 
 
+//region COLLECTION TAB CONTENT
 @Composable
 fun CollectionTabContent(
     collection: List<CollectionResponse>,
@@ -384,6 +397,7 @@ fun CollectionTabContent(
 
 }
 
+//region BOTTOM SHEET CONTENT
 @Composable
 fun BottomSheetContent() {
 
@@ -429,6 +443,7 @@ fun BottomSheetContent() {
 
 }
 
+//region BOTTOM SHEET MENU
 @Composable
 fun BottomSheetMenuItem(icon: ImageVector, text: String) {
 
@@ -448,6 +463,7 @@ fun BottomSheetMenuItem(icon: ImageVector, text: String) {
 
 }
 
+//region PREVIEW HOME SCREEN
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
@@ -466,6 +482,7 @@ fun HomeScreenPreview() {
 
 }
 
+//region PREVIEW BOTTOM SHEET CONTENT
 @Preview(showBackground = true)
 @Composable
 fun BottomSheetContentPreview() {
@@ -478,3 +495,22 @@ fun BottomSheetContentPreview() {
         }
     }
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeTabContentPreview(){
+//
+//    val fakeListPhoto = listOf<PhotoResponse>(
+//        PhotoResponse()
+//    )
+//
+//    Box(
+//        modifier = Modifier.fillMaxSize()
+//    ){
+//        HomeTabContent(
+//            photos = fakeListPhoto,
+//            onPhotoClick = {  },
+//            onUserClick = {  }
+//        )
+//    }
+//}

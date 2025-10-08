@@ -102,7 +102,7 @@ fun SearchScreen(
         ) { page ->
             when (page) {
                 0 -> SearchPhotosPage(navController, sharedViewModel)
-                1 -> EmptyState()
+                1 -> SearchCollectionPage(navController, sharedViewModel)
                 2 -> EmptyState()
             }
         }
@@ -145,8 +145,24 @@ fun SearchScreenPreview() {
     MyAppTheme {
 
         Surface(modifier = Modifier.fillMaxSize()) {
-            SearchScreen(navController = NavHostController(LocalContext.current))
+            SearchScreen(
+                navController = NavHostController(LocalContext.current),
+                sharedViewModel = hiltViewModel<SearchViewModel>()
+            )
 
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+
+fun EmptyStatePreview() {
+    MyAppTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            EmptyState()
         }
     }
 }
