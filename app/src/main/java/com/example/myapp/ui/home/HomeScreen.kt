@@ -1,5 +1,10 @@
 package com.example.myapp.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +23,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -74,12 +80,19 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.LineHeightStyle
 import com.example.myapp.R
+import com.example.myapp.ui.components.BottomSheetContent
+import com.example.myapp.ui.components.CollectionScreen
+import com.example.myapp.ui.components.PhotoScreen
+import com.example.myapp.ui.components.SortDialog
 import java.nio.file.WatchEvent
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -92,59 +105,31 @@ fun HomeScreen(
     val uiState by homeViewModel.photoList.collectAsState()
     val pageState = rememberPagerState { tabTitles.size }
     val coroutineScope = rememberCoroutineScope()
-
     var showSortDialog by remember { mutableStateOf(false) }
     val sortOptions = listOf("Latest", "Oldest", "Popular")
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
-
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    var isBottomBarVisible by rememberSaveable { mutableStateOf(true) }
 
-    //region ALERT DIALOG
+    val photoListState = rememberLazyListState()
+    val collectionListState = rememberLazyListState()
+
+//region DIALOG
     if (showSortDialog) {
-        AlertDialog(
-            onDismissRequest = { showSortDialog = false },
-            title = { Text("Sort by") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    sortOptions.forEach { option ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    selectedSortOption = option
-                                }
-                                .padding(vertical = 8.dp)
-                        ) {
-                            RadioButton(
-                                selected = (option == selectedSortOption),
-                                onClick = {
-                                    selectedSortOption = option
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = option)
-                        }
-                    }
-                }
+        SortDialog(
+            selectedOption = selectedSortOption,
+            sortOptions = sortOptions,
+            onOptionSelected = { option ->
+                selectedSortOption = option
+                homeViewModel.sortPhotos(option.lowercase())
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showSortDialog = false
-                        //homeViewModel.refreshPhoto()
-                        homeViewModel.sortPhotos(selectedSortOption.lowercase())
-                    }
-                ) {
-                    Text("OK")
-                }
+            onConfirm = {
+                showSortDialog = false
+                homeViewModel.sortPhotos(selectedSortOption.lowercase())
             },
-            dismissButton = {
-                TextButton(onClick = { showSortDialog = false }) {
-                    Text("Cancel")
-                }
-            },
+            onDismiss = {
+                showSortDialog = false
+            }
         )
     }
 
@@ -171,7 +156,20 @@ fun HomeScreen(
                             selected = pageState.currentPage == index,
                             onClick = {
                                 coroutineScope.launch {
-                                    pageState.animateScrollToPage(index)
+
+                                    if (pageState.currentPage == index) {
+                                        when (index) {
+                                            0 -> {
+                                                photoListState.animateScrollToItem(0)
+                                            }
+
+                                            1 -> {
+                                                collectionListState.animateScrollToItem(0)
+                                            }
+                                        }
+                                    } else {
+                                        pageState.animateScrollToPage(index)
+                                    }
                                 }
                             },
                             text = { Text(text = title, color = Color.Black) }
@@ -185,52 +183,70 @@ fun HomeScreen(
             isFloatingActionButtonDocked = true,
 
             floatingActionButton = {
-                FloatingActionButton(
-                    shape = CircleShape,
-                    onClick = { },
-                    backgroundColor = Color.Black
+
+                AnimatedVisibility(
+                    visible = isBottomBarVisible,
+                    enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut()
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
+                    FloatingActionButton(
+                        shape = CircleShape,
+                        onClick = { },
+                        backgroundColor = Color.Black
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
+                    }
                 }
             },
 
             //region BOTTOM BAR
 
             bottomBar = {
-                BottomAppBar(
-                    cutoutShape = CircleShape,
-                    backgroundColor = Color.White,
-                    elevation = 8.dp
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Row {
-                            IconButton(onClick = {
-                                coroutineScope.launch {
-                                    sheetState.show()
+                AnimatedVisibility(
+                    visible = isBottomBarVisible,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it }),
+                    content = {
+                        BottomAppBar(
+                            cutoutShape = CircleShape,
+                            backgroundColor = Color.White,
+                            elevation = 8.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Row {
+                                    IconButton(onClick = {
+                                        coroutineScope.launch {
+                                            sheetState.show()
+                                        }
+                                    }) {
+                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                    }
                                 }
-                            }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                            }
-                        }
 
-                        Row {
-                            IconButton(onClick = {
-                                navController.navigate(Screen.Search.route)
-                            }) {
-                                Icon(Icons.Default.Search, contentDescription = "Search")
-                            }
-                            IconButton(onClick = {
-                                showSortDialog = true
-                            }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                                Row {
+                                    IconButton(onClick = {
+                                        navController.navigate(Screen.Search.route)
+                                    }) {
+                                        Icon(Icons.Default.Search, contentDescription = "Search")
+                                    }
+                                    IconButton(onClick = {
+                                        showSortDialog = true
+                                    }) {
+                                        Icon(
+                                            Icons.Default.MoreVert,
+                                            contentDescription = "More Options"
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                )
+
             }
 
         ) { paddingValues ->
@@ -244,13 +260,23 @@ fun HomeScreen(
                     when (page) {
                         //Photo Screen
                         0 -> {
-                            PhotoScreen(navController = navController, viewModel = homeViewModel)
+                            PhotoScreen(
+                                navController = navController, viewModel = homeViewModel,
+                                onScroll = { visible ->
+                                    isBottomBarVisible = visible
+                                },
+                                listState = photoListState
+                            )
                         }
                         // Collection Screen
                         1 -> {
                             CollectionScreen(
                                 navController = navController,
-                                viewModel = homeViewModel
+                                viewModel = homeViewModel,
+                                onScroll = { visible ->
+                                    isBottomBarVisible = visible
+                                },
+                                listState = collectionListState
                             )
                         }
                     }
@@ -258,209 +284,6 @@ fun HomeScreen(
             }
         }
     }
-}
-
-//region HOMETABCONTENT
-@Composable
-fun HomeTabContent(
-    photos: List<PhotoResponse>,
-    onPhotoClick: (String) -> Unit,
-    onUserClick: (String) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp)
-    ) {
-        items(
-            items = photos,
-            key = { photo -> photo.id }
-        ) { photo ->
-            PhotoListItem(
-                photo = photo, onItemClick = onPhotoClick,
-                placeholder = null,
-                onUserClick = onUserClick
-//                onUserClick = {username ->
-//                    navController.navigate(Screen.Profile.createRoute(username))
-//                }
-            )
-
-        }
-    }
-}
-
-//region PHOTOSCREEN
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PhotoScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
-    val uiState by viewModel.photoList.collectAsState()
-    val isRefreshing by viewModel.isRefreshingPhoto.collectAsState()
-
-
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = { viewModel.refreshPhoto() }
-    ) {
-        when (val state = uiState) {
-            is UiState.Loading -> {
-                LottieLoadingIndicator()
-            }
-
-            is UiState.Success -> {
-                HomeTabContent(
-                    photos = state.data, onPhotoClick = { photoId ->
-                        navController.navigate(Screen.Detail.createRoute(photoId))
-                    },
-                    onUserClick = { username ->
-                        navController.navigate(Screen.Profile.createRoute(username))
-                    }
-                )
-            }
-
-            is UiState.Error -> {
-                Text(
-                    text = state.message ?: "Unknown error",
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            UiState.Init -> {
-
-            }
-        }
-    }
-
-}
-
-
-//region COLLECTION SCREEN
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CollectionScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
-    val uiState by viewModel.collectionList.collectAsState()
-
-    val isRefreshing by viewModel.isRefreshingCollection.collectAsState()
-
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = { viewModel.refreshCollection() }
-    ) {
-        when (val state = uiState) {
-            is UiState.Loading -> {
-
-                LottieLoadingIndicator()
-            }
-
-            is UiState.Success -> {
-                CollectionTabContent(collection = state.data, onCollectionClick = { collectionId ->
-                    navController.navigate(Screen.CollectionDetail.createRoute(collectionId))
-                }, onUserClick = {
-                    navController.navigate(Screen.Profile.createRoute(it))
-                })
-            }
-
-            is UiState.Error -> {
-                Text(
-                    text = state.message,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            UiState.Init -> {}
-        }
-    }
-}
-
-
-//region COLLECTION TAB CONTENT
-@Composable
-fun CollectionTabContent(
-    collection: List<CollectionResponse>,
-    onCollectionClick: (String) -> Unit,
-    onUserClick: (String) -> Unit
-) {
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp)
-    ) {
-        items(
-            items = collection,
-            key = { collection -> collection.id }
-        ) { collection ->
-            CollectionListItem(
-                collection = collection, onItemClick = onCollectionClick,
-                onUserClick = onUserClick
-            )
-        }
-    }
-
-}
-
-//region BOTTOM SHEET CONTENT
-@Composable
-fun BottomSheetContent() {
-
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .width(40.dp)
-                .height(4.dp)
-                .clip(CircleShape)
-                .background(Color.Gray)
-                .align(Alignment.CenterHorizontally)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painterResource(id = R.drawable.logo),
-                contentDescription = "App Icon",
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                Text("Resplash_Clone", style = MaterialTheme.typography.bodyMedium)
-                Text("Powered by creators everywhere", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-        BottomSheetMenuItem(icon = Icons.Default.Settings, text = "Auto Wallpaper")
-        BottomSheetMenuItem(icon = Icons.Default.Star, text = "Upgrade to Resplash Pro")
-        BottomSheetMenuItem(icon = Icons.Default.Settings, text = "Settings")
-        BottomSheetMenuItem(icon = Icons.Default.Info, text = "About")
-    }
-
-}
-
-//region BOTTOM SHEET MENU
-@Composable
-fun BottomSheetMenuItem(icon: ImageVector, text: String) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {}
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Icon(imageVector = icon, contentDescription = text, tint = Color.Gray)
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text)
-
-    }
-
 }
 
 //region PREVIEW HOME SCREEN
@@ -495,22 +318,3 @@ fun BottomSheetContentPreview() {
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HomeTabContentPreview(){
-//
-//    val fakeListPhoto = listOf<PhotoResponse>(
-//        PhotoResponse()
-//    )
-//
-//    Box(
-//        modifier = Modifier.fillMaxSize()
-//    ){
-//        HomeTabContent(
-//            photos = fakeListPhoto,
-//            onPhotoClick = {  },
-//            onUserClick = {  }
-//        )
-//    }
-//}

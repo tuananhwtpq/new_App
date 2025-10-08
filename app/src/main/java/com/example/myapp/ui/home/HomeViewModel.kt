@@ -36,6 +36,9 @@ class HomeViewModel @Inject constructor(
     private val _isRefreshingCollection = MutableStateFlow(false)
     val isRefreshingCollection: StateFlow<Boolean> = _isRefreshingCollection.asStateFlow()
 
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
     init {
         fetchPhotos()
         getAllCollections()
@@ -56,11 +59,30 @@ class HomeViewModel @Inject constructor(
         fetchPhotos(isRefreshing = true, orderBy = orderBy)
     }
 
+    fun loadMorePhotos() {
+        if (_isLoadingMore.value || photoList.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            fetchPhotos()
+            _isLoadingMore.value = false
+        }
+    }
+
+    fun loadMoreCollections() {
+        if (_isLoadingMore.value || collectionList.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            getAllCollections()
+            _isLoadingMore.value = false
+        }
+    }
 
     fun fetchPhotos(isRefreshing: Boolean = false, orderBy: String = "latest") {
         viewModelScope.launch {
 
-            if (_photoList.value.data.isNullOrEmpty()) {
+            if (currentPhotoPage == 1 && !isRefreshing) {
                 _photoList.value = UiState.Loading
             }
 
@@ -91,9 +113,11 @@ class HomeViewModel @Inject constructor(
     fun getAllCollections(isRefreshing: Boolean = false) {
         viewModelScope.launch {
 
-            if (!isRefreshing) {
+            if (currentCollectionPage == 1 && !isRefreshing) {
                 _collectionList.value = UiState.Loading
-            } else {
+            }
+
+            if (isRefreshing) {
                 _isRefreshingCollection.value = true
             }
 
@@ -101,8 +125,16 @@ class HomeViewModel @Inject constructor(
 
                 val result = collectionRepository.getAllCollections(currentCollectionPage, 20)
 
-                result.onSuccess {
-                    _collectionList.value = UiState.Success(it)
+                result.onSuccess { newCollections ->
+                    if (currentCollectionPage == 1) {
+                        _collectionList.value = UiState.Success(newCollections)
+                    } else {
+                        val currentList =
+                            (_collectionList.value as UiState.Success).data.toMutableList()
+                                ?: emptyList()
+                        _collectionList.value = UiState.Success(currentList + newCollections)
+                    }
+                    //_collectionList.value = UiState.Success(it)
                     currentCollectionPage++
                 }
                     .onFailure {
