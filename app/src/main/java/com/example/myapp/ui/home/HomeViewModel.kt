@@ -56,7 +56,9 @@ class HomeViewModel @Inject constructor(
 
     fun sortPhotos(orderBy: String) {
         currentPhotoPage = 1
-        fetchPhotos(isRefreshing = true, orderBy = orderBy)
+
+        _photoList.value = UiState.Loading
+        fetchPhotos(isRefreshing = false, orderBy = orderBy)
     }
 
     fun loadMorePhotos() {

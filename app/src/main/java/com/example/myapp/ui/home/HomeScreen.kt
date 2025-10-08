@@ -122,10 +122,7 @@ fun HomeScreen(
             onOptionSelected = { option ->
                 selectedSortOption = option
                 homeViewModel.sortPhotos(option.lowercase())
-            },
-            onConfirm = {
                 showSortDialog = false
-                homeViewModel.sortPhotos(selectedSortOption.lowercase())
             },
             onDismiss = {
                 showSortDialog = false
@@ -142,7 +139,6 @@ fun HomeScreen(
         }
 
     ) {
-
         Scaffold(
             topBar = {
                 //region TOPBAR
