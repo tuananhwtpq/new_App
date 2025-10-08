@@ -338,7 +338,8 @@ fun PhotoDetailContent() {
         exif = null,
         tags = fakeTag,
         width = 3000,
-        height = 6000
+        height = 6000,
+        blur_hash = "123456"
     )
 
     MyAppTheme {

@@ -1,5 +1,6 @@
 package com.example.myapp.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapp.data.model.CollectionResponse
@@ -102,6 +103,7 @@ class HomeViewModel @Inject constructor(
                     _photoList.value = UiState.Success(currentList + newPhotos)
                 }
                 currentPhotoPage++
+                Log.d("HomeViewModel", "Result : $newPhotos")
             }.onFailure {
                 _photoList.value = UiState.Error(
                     "Lỗi không lấy được dữ liệu HomeViewModel: ${it.message}" ?: "Unknown error"

@@ -1,8 +1,7 @@
 package com.example.myapp.ui.components
 
-import android.app.Notification.Style
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,10 +32,10 @@ import coil.compose.AsyncImage
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
-import com.example.myapp.data.model.Tag
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
-import java.nio.file.WatchEvent
+
+//import io.github.mortezanedaei.blurhash_compose.BlurHashImage
 
 
 @Composable
@@ -91,16 +89,41 @@ fun PhotoListItem(
             shape = RoundedCornerShape(16.dp),
 
             ) {
-            AsyncImage(
-                model = photo.urls?.regular,
-                contentDescription = photo.description ?: "Unknown Photo",
-                placeholder = placeholder,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-                contentScale = ContentScale.Crop
+                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat())
+            ) {
 
-            )
+                AsyncImage(
+                    model = photo.urls?.regular,
+                    contentDescription = photo.description ?: "Unknown Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+
+//            if (!photo.blur_hash.isNullOrBlank() && !photo.urls?.regular.isNullOrBlank()) {
+//                BlurHashImage(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
+//                    blurHash = photo.blur_hash,
+//                    imageUrl = photo.urls.regular,
+//                    contentDescription = photo.description,
+//                    contentScale = ContentScale.Crop,
+//                )
+//            } else {
+//                AsyncImage(
+//                    model = photo.urls?.regular,
+//                    contentDescription = photo.description,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
+//                    contentScale = ContentScale.Crop
+//                )
+//            }
+            }
         }
 
     }
@@ -152,7 +175,8 @@ fun PhotoListItemPreview() {
         exif = null,
         tags = null,
         width = 3000,
-        height = 6000
+        height = 6000,
+        blur_hash = "123456"
     )
 
     MyAppTheme {

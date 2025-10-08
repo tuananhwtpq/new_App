@@ -192,7 +192,8 @@ private val fakePhotos = listOf(
         exif = null,
         tags = null,
         width = 3000,
-        height = 6000
+        height = 6000,
+        blur_hash = "123456"
     )
 )
 

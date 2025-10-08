@@ -169,7 +169,7 @@ fun HomeTabContent(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    LottieLoadingIndicator()
                 }
             }
         }

@@ -15,6 +15,9 @@ data class PhotoResponse(
     @SerializedName("user")
     val user: User?,
 
+    @SerializedName("blur_hash")
+    val blur_hash: String?,
+
     @SerializedName("downloads")
     val downloads: Int?,
 
