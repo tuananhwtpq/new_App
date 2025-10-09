@@ -131,7 +131,8 @@ fun UserProfileContent(
                         UserPhotosGrid(
                             state = photosState,
                             isLoadingMore = isLoadingMore,
-                            onLoadMore = onLoadMorePhotos
+                            onLoadMore = onLoadMorePhotos,
+                            navController = navController
                         )
                     }
 

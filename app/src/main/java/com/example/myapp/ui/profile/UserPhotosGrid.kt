@@ -24,8 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapp.data.model.PhotoResponse
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.utils.UiState
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun UserPhotosGrid(
+    navController: NavController,
     state: UiState<List<PhotoResponse>>,
     isLoadingMore: Boolean,
     onLoadMore: () -> Unit
@@ -78,7 +81,7 @@ fun UserPhotosGrid(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                             .clickable {
-
+                                navController.navigate(Screen.Detail.createRoute(photo.id))
                             },
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

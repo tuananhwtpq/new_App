@@ -115,7 +115,10 @@ fun UserLikePhoto(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
+                                .padding(horizontal = 16.dp)
+                                .clickable{
+                                    navController.navigate(Screen.Detail.createRoute(photo.id))
+                                },
                             shape = RoundedCornerShape(16.dp),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
