@@ -53,6 +53,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.remember
 import androidx.room.util.TableInfo
 import com.example.myapp.data.model.Tag
+import com.example.myapp.utils.ex.toFormattedString
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -238,21 +239,22 @@ fun PhotoDetailContent(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InfoItem("Views", photo.downloads?.toString() ?: "0")
+                    InfoItem("Views", photo.downloads.toFormattedString())
                 }
 
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InfoItem("Downloads", photo.downloads?.toString() ?: "0")
+
+                    InfoItem("Downloads", photo.downloads.toFormattedString())
                 }
 
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InfoItem("Likes", photo.likes?.toString() ?: "0")
+                    InfoItem("Likes", photo.likes.toFormattedString())
                 }
 
             }

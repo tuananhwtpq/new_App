@@ -50,6 +50,7 @@ import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.components.InfoItem2
 import com.example.myapp.utils.UiState
+import com.example.myapp.utils.ex.toFormattedString
 import kotlinx.coroutines.launch
 import java.nio.file.WatchEvent
 import kotlin.math.roundToInt
@@ -175,7 +176,7 @@ fun UserProfileContent(
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    
+
                     AsyncImage(
                         model = user.profile_image?.large,
                         contentDescription = "User Avatar",
@@ -183,9 +184,12 @@ fun UserProfileContent(
                             .size(80.dp)
                             .clip(CircleShape)
                     )
-                    InfoItem2(title = "Photos", value = user.total_photos.toString())
-                    InfoItem2(title = "Likes", value = user.total_likes.toString())
-                    InfoItem2(title = "Collections", value = user.total_collections.toString())
+                    InfoItem2(title = "Photos", value = user.total_photos.toFormattedString())
+                    InfoItem2(title = "Likes", value = user.total_likes.toFormattedString())
+                    InfoItem2(
+                        title = "Collections",
+                        value = user.total_collections.toFormattedString()
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = user.name ?: "", fontWeight = FontWeight.Bold)
