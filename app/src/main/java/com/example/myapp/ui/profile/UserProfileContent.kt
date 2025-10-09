@@ -33,6 +33,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
@@ -55,6 +58,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UserProfileContent(
+    navController: NavController,
     user: User,
     photosState: UiState<List<PhotoResponse>>,
     userLikePhotoState: UiState<List<PhotoResponse>>,
@@ -64,7 +68,9 @@ fun UserProfileContent(
     isLoadingUserCollection: Boolean,
     onLoadMorePhotos: () -> Unit,
     onLoadMoreLikePhotos: () -> Unit,
-    onLoadMoreUserCollection: () -> Unit
+    onLoadMoreUserCollection: () -> Unit,
+    onCollectionClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     //Chiều cao phần user info
     var userInfoHeightPx by remember { mutableFloatStateOf(0f) }
@@ -132,7 +138,9 @@ fun UserProfileContent(
                         UserLikePhoto(
                             state = userLikePhotoState,
                             isLoadingLikePhoto = isLoadingLikePhoto,
-                            onLoadMoreLikePhotos = onLoadMoreLikePhotos
+                            onLoadMoreLikePhotos = onLoadMoreLikePhotos,
+                            onUserClick = onUserClick,
+                            navController = navController
                         )
                     }
 
@@ -141,8 +149,8 @@ fun UserProfileContent(
                             state = userCollectionState,
                             isLoadingUserCollection = isLoadingUserCollection,
                             onLoadMoreUserCollection = onLoadMoreUserCollection,
-                            onCollectionClick = {},
-                            onUserClick = { }
+                            onCollectionClick = onCollectionClick,
+                            onUserClick = onUserClick
                         )
                     }
                 }
@@ -167,6 +175,7 @@ fun UserProfileContent(
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    
                     AsyncImage(
                         model = user.profile_image?.large,
                         contentDescription = "User Avatar",

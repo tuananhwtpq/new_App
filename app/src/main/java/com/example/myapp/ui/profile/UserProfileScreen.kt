@@ -18,12 +18,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.data.model.User
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.theme.MyAppTheme
 import com.example.myapp.utils.UiState
@@ -107,7 +109,14 @@ fun UserProfileScreen(
                         onLoadMoreLikePhotos = { viewModel.loadMoreLikePhoto() },
                         isLoadingUserCollection = isLoadingUserCollection,
                         onLoadMoreUserCollection = { viewModel.loadMoreUserCollection() },
-                        userCollectionState = userCollectionState
+                        userCollectionState = userCollectionState,
+                        onCollectionClick = {
+                            navController.navigate(Screen.CollectionDetail.createRoute(it))
+                        },
+                        onUserClick = {
+                            //navController.navigate(Screen.Profile.createRoute(state.data.username.toString()))
+                        },
+                        navController = navController
                     )
                 }
 
@@ -172,7 +181,10 @@ fun UserProfileContentPreview() {
             onLoadMoreLikePhotos = { },
             isLoadingUserCollection = true,
             onLoadMoreUserCollection = {},
-            userCollectionState = UiState.Success(emptyList())
+            userCollectionState = UiState.Success(emptyList()),
+            onCollectionClick = {},
+            onUserClick = {},
+            navController = NavController(LocalContext.current)
         )
     }
 }
@@ -191,7 +203,10 @@ fun UserProfileContentLoadingPreview() {
             onLoadMoreLikePhotos = { },
             isLoadingUserCollection = true,
             onLoadMoreUserCollection = {},
-            userCollectionState = UiState.Loading
+            userCollectionState = UiState.Loading,
+            onCollectionClick = {},
+            onUserClick = {},
+            navController = NavController(LocalContext.current)
         )
     }
 }

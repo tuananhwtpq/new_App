@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Scaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -31,8 +32,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapp.data.model.PhotoResponse
+import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.utils.UiState
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -40,9 +43,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun UserLikePhoto(
+    navController: NavController,
     state: UiState<List<PhotoResponse>>,
     isLoadingLikePhoto: Boolean,
-    onLoadMoreLikePhotos: () -> Unit
+    onLoadMoreLikePhotos: () -> Unit,
+    onUserClick: (String) -> Unit
 ) {
 
     when (state) {
@@ -87,7 +92,9 @@ fun UserLikePhoto(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                                 .clickable {
-                                    // TODO: Handle user click
+                                    photo.user?.username?.let {
+                                        navController.navigate(Screen.Profile.createRoute(it))
+                                    }
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
