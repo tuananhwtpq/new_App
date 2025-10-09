@@ -30,6 +30,7 @@ import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.utils.UiState
+import com.wajahatiqbal.blurhash.BlurHashPainter
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 
@@ -100,8 +101,20 @@ fun UserPhotosGrid(
                         AsyncImage(
                             model = photo.urls?.regular,
                             contentDescription = photo.description,
-                            placeholder = placeholderPainter,
-                            error = placeholderPainter,
+                            placeholder = BlurHashPainter(
+                                blurHash = photo.blur_hash,
+                                width = photo.width,
+                                height = photo.height,
+                                punch = 1F,
+                                scale = 0.1F
+                            ),
+                            error = BlurHashPainter(
+                                blurHash = photo.blur_hash,
+                                width = photo.width,
+                                height = photo.height,
+                                punch = 1F,
+                                scale = 0.1F
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),

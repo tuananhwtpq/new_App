@@ -52,8 +52,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.remember
 import androidx.room.util.TableInfo
+import com.example.myapp.R
 import com.example.myapp.data.model.Tag
 import com.example.myapp.utils.ex.toFormattedString
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import com.wajahatiqbal.blurhash.BlurHashPainter
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -86,8 +90,20 @@ fun PhotoDetailContent(
                 AsyncImage(
                     model = photo.urls?.regular,
                     contentDescription = photo.description,
-                    placeholder = placeholderPainter,
-                    error = placeholderPainter,
+                    placeholder = BlurHashPainter(
+                        blurHash = photo.blur_hash,
+                        width = photo.width,
+                        height = photo.height,
+                        punch = 1F,
+                        scale = 0.1F
+                    ),
+                    error = BlurHashPainter(
+                        blurHash = photo.blur_hash,
+                        width = photo.width,
+                        height = photo.height,
+                        punch = 1F,
+                        scale = 0.1F
+                    ),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -144,6 +160,7 @@ fun PhotoDetailContent(
                             }
                         }
                         .padding(4.dp)
+                        .weight(1f)
                 ) {
                     AsyncImage(
                         model = photo.user?.profile_image?.medium,
@@ -158,13 +175,17 @@ fun PhotoDetailContent(
                     Text(
                         text = photo.user?.name ?: "Unknown",
                         style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Spacer(Modifier.weight(1f))
-
                 IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Done, contentDescription = "Download")
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(R.drawable.download),
+                        contentDescription = "Download"
+                    )
                 }
 
                 IconButton(onClick = { /*TODO*/ }) {
@@ -172,7 +193,11 @@ fun PhotoDetailContent(
                 }
                 IconButton(onClick = { /*TODO*/ }) {
                     //
-                    Icon(Icons.Default.AccountBox, contentDescription = "Bookmark")
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(R.drawable.bookmark),
+                        contentDescription = "Bookmark"
+                    )
                 }
             }
         }

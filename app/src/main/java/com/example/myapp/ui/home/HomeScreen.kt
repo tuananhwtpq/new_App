@@ -82,7 +82,7 @@ fun HomeScreen(
     val photoListState = rememberLazyListState()
     val collectionListState = rememberLazyListState()
 
-//region DIALOG
+    //region DIALOG
     if (showSortDialog) {
         SortDialog(
             selectedOption = selectedSortOption,

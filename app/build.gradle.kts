@@ -100,6 +100,7 @@ dependencies {
     //implementation("io.github.mortezanedaei:blurhash-compose:1.0.0")
 
     //implementation(libs.blurhash)
+    implementation ("com.github.wajahat-iqbal:BlurHashPainter:1.2")
 
 
 }
