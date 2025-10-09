@@ -37,6 +37,7 @@ import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
+import com.wajahatiqbal.blurhash.BlurHashPainter
 import java.nio.file.WatchEvent
 
 
@@ -48,7 +49,7 @@ fun CollectionListItem(
     placeholder: Painter? = null,
     onUserClick: (String) -> Unit,
 
-) {
+    ) {
 
     Column(
         modifier = Modifier
@@ -112,7 +113,14 @@ fun CollectionListItem(
                 AsyncImage(
                     model = collection.cover_photo?.urls?.regular,
                     contentDescription = collection.description ?: "Unknown collection",
-                    placeholder = placeholderPainter,
+                    placeholder = BlurHashPainter(
+                        blurHash = collection.cover_photo?.blur_hash
+                            ?: collection.cover_photo?.color,
+                        width = 300,
+                        height = 300,
+                        punch = 1F,
+                        scale = 0.1F
+                    ),
                     error = placeholderPainter,
                     modifier = Modifier
                         .fillMaxSize(),
@@ -183,6 +191,10 @@ fun CollectionListItem() {
             thumb = null,
             small_s3 = null
         ),
+        width = 12,
+        height = 12,
+        blur_hash = "kjkjasd",
+        color = "111",
     )
 
     val newCollection = CollectionResponse(
@@ -193,7 +205,6 @@ fun CollectionListItem() {
         cover_photo = newCoverPhoto,
         user = newUser,
         links = null,
-        blur_hash = null,
         color = null
     )
 

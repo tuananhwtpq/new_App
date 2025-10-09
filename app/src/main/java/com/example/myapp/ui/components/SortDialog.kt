@@ -35,7 +35,6 @@ fun SortDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onOptionSelected(option) }
-                            .padding(vertical = 4.dp)
                     ) {
                         RadioButton(
                             selected = (option == selectedOption),

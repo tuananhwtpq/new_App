@@ -3,6 +3,8 @@ package com.example.myapp.ui.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -73,26 +76,49 @@ fun HomeScreen(
     var showSortDialog by remember { mutableStateOf(false) }
     val sortOptions = listOf("Latest", "Oldest", "Popular")
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
+
+    val collectionSortOption = listOf("ALL")
+    var selectedCollectionSortOption by remember { mutableStateOf(collectionSortOption[0]) }
+
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     var isBottomBarVisible by rememberSaveable { mutableStateOf(true) }
 
     val photoListState = rememberLazyListState()
     val collectionListState = rememberLazyListState()
 
-//region DIALOG
+    //region DIALOG
     if (showSortDialog) {
-        SortDialog(
-            selectedOption = selectedSortOption,
-            sortOptions = sortOptions,
-            onOptionSelected = { option ->
-                selectedSortOption = option
-                homeViewModel.sortPhotos(option.lowercase())
-                showSortDialog = false
-            },
-            onDismiss = {
-                showSortDialog = false
+        when(pageState.currentPage){
+            0 -> {
+                SortDialog(
+                    selectedOption = selectedSortOption,
+                    sortOptions = sortOptions,
+                    onOptionSelected = { option ->
+                        selectedSortOption = option
+                        homeViewModel.sortPhotos(option.lowercase())
+                        showSortDialog = false
+                    },
+                    onDismiss = {
+                        showSortDialog = false
+                    }
+                )
             }
-        )
+            1 -> {
+                SortDialog(
+                    selectedOption = selectedCollectionSortOption,
+                    sortOptions = collectionSortOption,
+                    onOptionSelected = { option ->
+                        selectedCollectionSortOption = option
+                        //homeViewModel.sortPhotos(option.lowercase())
+                        showSortDialog = false
+                    },
+                    onDismiss = {
+                        showSortDialog = false
+                    }
+                )
+            }
+        }
+
     }
 
     //region MODAL BOTTOM SHEET
@@ -105,6 +131,7 @@ fun HomeScreen(
 
     ) {
         Scaffold(
+            modifier = Modifier.navigationBarsPadding(),
             topBar = {
                 //region TOPBAR
                 TabRow(
@@ -147,8 +174,8 @@ fun HomeScreen(
 
                 AnimatedVisibility(
                     visible = isBottomBarVisible,
-                    enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut()
+                    enter = scaleIn() + fadeIn(),
+                    exit = scaleOut() + fadeOut()
                 ) {
                     FloatingActionButton(
                         shape = CircleShape,

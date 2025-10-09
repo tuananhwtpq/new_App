@@ -140,6 +140,7 @@ class HomeViewModel @Inject constructor(
                     }
                     //_collectionList.value = UiState.Success(it)
                     currentCollectionPage++
+                    Log.d("HomeViewModel", "Result : $newCollections")
                 }
                     .onFailure {
                         _collectionList.value = UiState.Error(

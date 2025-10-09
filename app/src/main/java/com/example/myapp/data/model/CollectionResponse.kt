@@ -16,8 +16,8 @@ data class CollectionResponse(
     @SerializedName("total_photos")
     val total_photos: Int,
 
-    @SerializedName("blur_hash")
-    val blur_hash: String?,
+//    @SerializedName("blur_hash")
+//    val blur_hash: String?,
 
     @SerializedName("color")
     val color: String?,
@@ -30,6 +30,5 @@ data class CollectionResponse(
 
     @SerializedName("cover_photo")
     val cover_photo: CoverPhoto?,
-
 
     )

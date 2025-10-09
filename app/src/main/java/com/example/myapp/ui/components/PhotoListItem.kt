@@ -35,6 +35,7 @@ import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
+import com.wajahatiqbal.blurhash.BlurHashPainter
 
 
 @Composable
@@ -103,12 +104,33 @@ fun PhotoListItem(
 
                 val placeholderPainter = ColorPainter(placeholderColor)
 
+//                AsyncImage(
+//                    model = photo.urls?.regular,
+//                    contentDescription = photo.description ?: "Unknown Photo",
+//                    modifier = Modifier.fillMaxSize(),
+//                    placeholder = placeholderPainter,
+//                    error = placeholderPainter,
+//                    contentScale = ContentScale.Crop
+//                )
+
                 AsyncImage(
                     model = photo.urls?.regular,
                     contentDescription = photo.description ?: "Unknown Photo",
                     modifier = Modifier.fillMaxSize(),
-                    placeholder = placeholderPainter,
-                    error = placeholderPainter,
+                    placeholder = BlurHashPainter(
+                        blurHash = photo.blur_hash,
+                        width = photo.width,
+                        height = photo.height,
+                        punch = 1F,
+                        scale = 0.1F
+                    ),
+                    error = BlurHashPainter(
+                        blurHash = photo.blur_hash,
+                        width = photo.width,
+                        height = photo.height,
+                        punch = 1F,
+                        scale = 0.1F
+                    ),
                     contentScale = ContentScale.Crop
                 )
 
