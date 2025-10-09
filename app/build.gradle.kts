@@ -97,7 +97,9 @@ dependencies {
 
     //implementation("com.github.woltapp:blurhash-compose:1.0.4")
 
-    implementation("io.github.mortezanedaei:blurhash-compose:1.0.0")
+    //implementation("io.github.mortezanedaei:blurhash-compose:1.0.0")
+
+    //implementation(libs.blurhash)
 
 
 }

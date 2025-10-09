@@ -50,6 +50,7 @@ import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.remember
 import androidx.room.util.TableInfo
 import com.example.myapp.data.model.Tag
 
@@ -70,11 +71,22 @@ fun PhotoDetailContent(
                     .fillMaxWidth()
                     .height(350.dp)
             ) {
+
+                val placeholderColor = remember(photo.color) {
+                    try {
+                        Color(android.graphics.Color.parseColor(photo.color))
+                    } catch (e: Exception) {
+                        Color.LightGray
+                    }
+                }
+
+                val placeholderPainter = ColorPainter(placeholderColor)
+
                 AsyncImage(
                     model = photo.urls?.regular,
                     contentDescription = photo.description,
-                    placeholder = placeholder,
-                    error = placeholder,
+                    placeholder = placeholderPainter,
+                    error = placeholderPainter,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -339,7 +351,8 @@ fun PhotoDetailContent() {
         tags = fakeTag,
         width = 3000,
         height = 6000,
-        blur_hash = "123456"
+        blur_hash = "123456",
+        color = "123456"
     )
 
     MyAppTheme {

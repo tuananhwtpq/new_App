@@ -27,6 +27,9 @@ data class PhotoResponse(
     @SerializedName("exif")
     val exif: Exif?,
 
+    @SerializedName("color")
+    val color: String?,
+
     @SerializedName("tags")
     val tags: List<Tag>?,
 

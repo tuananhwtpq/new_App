@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,8 +35,6 @@ import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
-
-//import io.github.mortezanedaei.blurhash_compose.BlurHashImage
 
 
 @Composable
@@ -57,7 +56,6 @@ fun PhotoListItem(
                 .fillMaxWidth()
                 .clickable {
                     photo.user?.username.let { onUserClick(it.toString()) }
-                    //photo.user?.profile_image.let { onUserClick(it.toString()) }
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -95,34 +93,25 @@ fun PhotoListItem(
                     .aspectRatio(photo.width.toFloat() / photo.height.toFloat())
             ) {
 
+                val placeholderColor = remember(photo.color) {
+                    try {
+                        Color(android.graphics.Color.parseColor(photo.color))
+                    } catch (e: Exception) {
+                        Color.LightGray
+                    }
+                }
+
+                val placeholderPainter = ColorPainter(placeholderColor)
+
                 AsyncImage(
                     model = photo.urls?.regular,
                     contentDescription = photo.description ?: "Unknown Photo",
                     modifier = Modifier.fillMaxSize(),
+                    placeholder = placeholderPainter,
+                    error = placeholderPainter,
                     contentScale = ContentScale.Crop
                 )
 
-
-//            if (!photo.blur_hash.isNullOrBlank() && !photo.urls?.regular.isNullOrBlank()) {
-//                BlurHashImage(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-//                    blurHash = photo.blur_hash,
-//                    imageUrl = photo.urls.regular,
-//                    contentDescription = photo.description,
-//                    contentScale = ContentScale.Crop,
-//                )
-//            } else {
-//                AsyncImage(
-//                    model = photo.urls?.regular,
-//                    contentDescription = photo.description,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-//                    contentScale = ContentScale.Crop
-//                )
-//            }
             }
         }
 
@@ -176,7 +165,8 @@ fun PhotoListItemPreview() {
         tags = null,
         width = 3000,
         height = 6000,
-        blur_hash = "123456"
+        blur_hash = "123456",
+        color = "111"
     )
 
     MyAppTheme {

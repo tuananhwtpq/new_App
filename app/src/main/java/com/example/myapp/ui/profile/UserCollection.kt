@@ -32,17 +32,20 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
+import com.example.myapp.ui.components.CollectionListItem
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.utils.UiState
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-
 @Composable
-fun UserLikePhoto(
-    state: UiState<List<PhotoResponse>>,
-    isLoadingLikePhoto: Boolean,
-    onLoadMoreLikePhotos: () -> Unit
+fun UserCollection(
+    state: UiState<List<CollectionResponse>>,
+    isLoadingUserCollection: Boolean,
+    onLoadMoreUserCollection: () -> Unit,
+    onCollectionClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
 
     when (state) {
@@ -69,7 +72,7 @@ fun UserLikePhoto(
                         if (lastVisibleItemIndex != null) {
                             val totalItemsCount = listState.layoutInfo.totalItemsCount
                             if (lastVisibleItemIndex >= totalItemsCount - 10 && totalItemsCount > 0) {
-                                onLoadMoreLikePhotos()
+                                onLoadMoreUserCollection()
                             }
                         }
                     }
@@ -80,63 +83,17 @@ fun UserLikePhoto(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(items = state.data, key = { it.id }) { photo ->
-                    Column(modifier = Modifier.padding(bottom = 8.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .clickable {
-                                    // TODO: Handle user click
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AsyncImage(
-                                model = photo.user?.profile_image?.medium,
-                                contentDescription = "User avatar",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = photo.user?.name ?: "Unknown User",
-                                color = Color.Black,
-                            )
-                        }
 
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            val placeholderColor = remember(photo.color) {
-                                try {
-                                    Color(android.graphics.Color.parseColor(photo.color))
-                                } catch (e: Exception) {
-                                    Color.LightGray
-                                }
-                            }
+                items(items = state.data, key = { it.id }) { collection ->
 
-                            val placeholderPainter = ColorPainter(placeholderColor)
-
-                            AsyncImage(
-                                model = photo.urls?.regular,
-                                contentDescription = photo.description,
-                                placeholder = placeholderPainter,
-                                error = placeholderPainter,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                    }
+                    CollectionListItem(
+                        collection = collection,
+                        onItemClick = onCollectionClick,
+                        onUserClick = onUserClick
+                    )
                 }
 
-                if (isLoadingLikePhoto) {
+                if (isLoadingUserCollection) {
                     item {
                         Box(
                             modifier = Modifier

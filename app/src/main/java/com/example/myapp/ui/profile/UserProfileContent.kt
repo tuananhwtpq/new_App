@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.components.InfoItem2
@@ -57,10 +58,13 @@ fun UserProfileContent(
     user: User,
     photosState: UiState<List<PhotoResponse>>,
     userLikePhotoState: UiState<List<PhotoResponse>>,
+    userCollectionState: UiState<List<CollectionResponse>>,
     isLoadingMore: Boolean,
     isLoadingLikePhoto: Boolean,
+    isLoadingUserCollection: Boolean,
     onLoadMorePhotos: () -> Unit,
-    onLoadMoreLikePhotos: () -> Unit
+    onLoadMoreLikePhotos: () -> Unit,
+    onLoadMoreUserCollection: () -> Unit
 ) {
     //Chiều cao phần user info
     var userInfoHeightPx by remember { mutableFloatStateOf(0f) }
@@ -133,12 +137,13 @@ fun UserProfileContent(
                     }
 
                     "COLLECTIONS" -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Collections Tab")
-                        }
+                        UserCollection(
+                            state = userCollectionState,
+                            isLoadingUserCollection = isLoadingUserCollection,
+                            onLoadMoreUserCollection = onLoadMoreUserCollection,
+                            onCollectionClick = {},
+                            onUserClick = { }
+                        )
                     }
                 }
             }

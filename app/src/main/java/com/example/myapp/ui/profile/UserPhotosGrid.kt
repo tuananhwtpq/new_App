@@ -16,9 +16,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -80,9 +83,22 @@ fun UserPhotosGrid(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
+
+                        val placeholderColor = remember(photo.color) {
+                            try {
+                                Color(android.graphics.Color.parseColor(photo.color))
+                            } catch (e: Exception) {
+                                Color.LightGray
+                            }
+                        }
+
+                        val placeholderPainter = ColorPainter(placeholderColor)
+
                         AsyncImage(
                             model = photo.urls?.regular,
                             contentDescription = photo.description,
+                            placeholder = placeholderPainter,
+                            error = placeholderPainter,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),

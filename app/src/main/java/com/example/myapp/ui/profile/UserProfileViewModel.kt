@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.User
 import com.example.myapp.repository.UserRepository
@@ -30,6 +31,10 @@ class UserProfileViewModel @Inject constructor(
     private val _userLikePhoto = MutableStateFlow<UiState<List<PhotoResponse>>>(UiState.Loading)
     val userLikePhoto: StateFlow<UiState<List<PhotoResponse>>> = _userLikePhoto.asStateFlow()
 
+    private val _userCollection =
+        MutableStateFlow<UiState<List<CollectionResponse>>>(UiState.Loading)
+    val userCollection: StateFlow<UiState<List<CollectionResponse>>> = _userCollection.asStateFlow()
+
     private val username: String = savedStateHandle.get<String>("username") ?: ""
 
     private val _isLoadingMore = MutableStateFlow(false)
@@ -38,8 +43,12 @@ class UserProfileViewModel @Inject constructor(
     private val _isLoadingLikePhoto = MutableStateFlow(false)
     val isLoadingLikePhoto: StateFlow<Boolean> = _isLoadingLikePhoto.asStateFlow()
 
+    private val _isLoadingUserCollection = MutableStateFlow(false)
+    val isLoadingUserCollection: StateFlow<Boolean> = _isLoadingUserCollection.asStateFlow()
+
     private var currentPhotoPage = 1
     private var currentLikePhotoPage = 1
+    private var currentUserCollectionPage = 1
 
     init {
 
@@ -49,6 +58,7 @@ class UserProfileViewModel @Inject constructor(
             getUserProfile(username)
             getUserListPhoto(username)
             getUserLikePhoto(username)
+            getUserCollection(username)
         }
     }
 
@@ -71,6 +81,18 @@ class UserProfileViewModel @Inject constructor(
             _isLoadingLikePhoto.value = true
             getUserLikePhoto(username)
             _isLoadingLikePhoto.value = false
+        }
+    }
+
+    //region LOAD MORE USER COLLECTION
+
+    fun loadMoreUserCollection() {
+        if (_isLoadingUserCollection.value || userCollection.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingUserCollection.value = true
+            getUserCollection(username)
+            _isLoadingUserCollection.value = false
         }
     }
 
@@ -162,6 +184,40 @@ class UserProfileViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _userLikePhoto.value = UiState.Error(e.message.toString())
+            }
+        }
+    }
+
+    //region GET USER COLLECTION
+    fun getUserCollection(username: String) {
+        viewModelScope.launch {
+            if (currentUserCollectionPage == 1) {
+                _userCollection.value = UiState.Loading
+            }
+
+            try {
+
+                val result =
+                    userRepository.getUserCollection(username, currentUserCollectionPage, 20)
+
+                result.onSuccess {
+                    if (currentUserCollectionPage == 1) {
+                        _userCollection.value = UiState.Success(it)
+                    } else {
+                        val currentList =
+                            (_userCollection.value as? UiState.Success)?.data ?: emptyList()
+                        _userCollection.value = UiState.Success(currentList + it)
+                    }
+                    currentUserCollectionPage++
+                }
+                    .onFailure {
+                        _userCollection.value = UiState.Error(it.message.toString())
+
+                    }
+
+            } catch (e: Exception) {
+                _userCollection.value = UiState.Error(e.message.toString())
+
             }
         }
     }
