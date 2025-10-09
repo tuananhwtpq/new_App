@@ -1,5 +1,6 @@
 package com.example.myapp.ui.detail
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -138,9 +139,7 @@ fun CollectionDetailScreen(
             }
 
             is UiState.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = state.message ?: "An error occurred")
-                }
+                Log.e("CollectionDetailScreen", "Error: ${state.message}")
             }
 
             else -> {}

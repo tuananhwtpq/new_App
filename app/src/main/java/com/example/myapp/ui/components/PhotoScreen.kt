@@ -1,5 +1,6 @@
 package com.example.myapp.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -121,10 +122,7 @@ fun PhotoScreen(
             }
 
             is UiState.Error -> {
-                Text(
-                    text = state.message ?: "Unknown error",
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Log.d("PhotoScreen", "Lỗi: $state")
             }
 
             UiState.Init -> {

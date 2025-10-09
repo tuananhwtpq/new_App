@@ -103,7 +103,7 @@ fun SearchScreen(
             when (page) {
                 0 -> SearchPhotosPage(navController, sharedViewModel)
                 1 -> SearchCollectionPage(navController, sharedViewModel)
-                2 -> EmptyState()
+                2 -> SearchUserPage(navController, sharedViewModel)
             }
         }
     }

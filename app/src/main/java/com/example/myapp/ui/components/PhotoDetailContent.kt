@@ -183,7 +183,7 @@ fun PhotoDetailContent(
                 IconButton(onClick = { /*TODO*/ }) {
                     Icon(
                         modifier = Modifier.size(24.dp),
-                        painter = painterResource(R.drawable.download),
+                        painter = painterResource(R.drawable.download_2),
                         contentDescription = "Download"
                     )
                 }
@@ -195,7 +195,7 @@ fun PhotoDetailContent(
                     //
                     Icon(
                         modifier = Modifier.size(24.dp),
-                        painter = painterResource(R.drawable.bookmark),
+                        painter = painterResource(R.drawable.book_mark_2),
                         contentDescription = "Bookmark"
                     )
                 }

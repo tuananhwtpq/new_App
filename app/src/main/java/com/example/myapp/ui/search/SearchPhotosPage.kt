@@ -41,7 +41,7 @@ fun SearchPhotosPage(
                             navController.navigate(Screen.Detail.createRoute(photo.id))
                         },
                         onUserClick = {
-                            navController.navigate(Screen.Profile.createRoute(photo.user?.username.toString()))
+
                         }
                     )
                 }

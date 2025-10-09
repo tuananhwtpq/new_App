@@ -76,6 +76,10 @@ fun HomeScreen(
     var showSortDialog by remember { mutableStateOf(false) }
     val sortOptions = listOf("Latest", "Oldest", "Popular")
     var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
+
+    val collectionSortOption = listOf("ALL")
+    var selectedCollectionSortOption by remember { mutableStateOf(collectionSortOption[0]) }
+
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     var isBottomBarVisible by rememberSaveable { mutableStateOf(true) }
 
@@ -84,18 +88,37 @@ fun HomeScreen(
 
     //region DIALOG
     if (showSortDialog) {
-        SortDialog(
-            selectedOption = selectedSortOption,
-            sortOptions = sortOptions,
-            onOptionSelected = { option ->
-                selectedSortOption = option
-                homeViewModel.sortPhotos(option.lowercase())
-                showSortDialog = false
-            },
-            onDismiss = {
-                showSortDialog = false
+        when(pageState.currentPage){
+            0 -> {
+                SortDialog(
+                    selectedOption = selectedSortOption,
+                    sortOptions = sortOptions,
+                    onOptionSelected = { option ->
+                        selectedSortOption = option
+                        homeViewModel.sortPhotos(option.lowercase())
+                        showSortDialog = false
+                    },
+                    onDismiss = {
+                        showSortDialog = false
+                    }
+                )
             }
-        )
+            1 -> {
+                SortDialog(
+                    selectedOption = selectedCollectionSortOption,
+                    sortOptions = collectionSortOption,
+                    onOptionSelected = { option ->
+                        selectedCollectionSortOption = option
+                        //homeViewModel.sortPhotos(option.lowercase())
+                        showSortDialog = false
+                    },
+                    onDismiss = {
+                        showSortDialog = false
+                    }
+                )
+            }
+        }
+
     }
 
     //region MODAL BOTTOM SHEET
