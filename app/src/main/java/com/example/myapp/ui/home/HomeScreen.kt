@@ -88,7 +88,7 @@ fun HomeScreen(
 
     //region DIALOG
     if (showSortDialog) {
-        when(pageState.currentPage){
+        when (pageState.currentPage) {
             0 -> {
                 SortDialog(
                     selectedOption = selectedSortOption,
@@ -103,13 +103,13 @@ fun HomeScreen(
                     }
                 )
             }
+
             1 -> {
                 SortDialog(
                     selectedOption = selectedCollectionSortOption,
                     sortOptions = collectionSortOption,
                     onOptionSelected = { option ->
                         selectedCollectionSortOption = option
-                        //homeViewModel.sortPhotos(option.lowercase())
                         showSortDialog = false
                     },
                     onDismiss = {
