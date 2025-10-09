@@ -25,7 +25,11 @@ class SearchUserViewModel @Inject constructor(
     private val _searchUserResult = MutableStateFlow<UiState<List<UserWithPhoto>>>(UiState.Loading)
     val searchUserResult: StateFlow<UiState<List<UserWithPhoto>>> = _searchUserResult.asStateFlow()
 
+    private val _isLoadingMore = MutableStateFlow<Boolean>(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
     private var currentUserPage = 1
+    private var currentQuery = ""
 
     fun searchUser(query: String) {
         viewModelScope.launch {

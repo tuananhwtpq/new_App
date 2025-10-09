@@ -117,7 +117,7 @@ fun UserLikePhoto(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
-                                .clickable{
+                                .clickable {
                                     navController.navigate(Screen.Detail.createRoute(photo.id))
                                 },
                             shape = RoundedCornerShape(16.dp),

@@ -8,6 +8,7 @@ import com.example.myapp.utils.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,12 +20,60 @@ class SearchPhotosViewModel @Inject constructor(
     private val _searchResult = MutableStateFlow<UiState<SearchPhotoResponse>>(UiState.Init)
     val searchResult: StateFlow<UiState<SearchPhotoResponse>> = _searchResult
 
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
+    private var currentPage = 1
+    private var currentQuery = ""
+
+
     fun searchPhotos(query: String) {
-        viewModelScope.launch {
+        if (query != currentQuery) {
+            currentPage = 1
+            currentQuery = query
             _searchResult.value = UiState.Loading
-            repository.searchPhotos(query, 1, 20)
-                .onSuccess { _searchResult.value = UiState.Success(it) }
+        }
+
+        fetchPhotosInternal()
+    }
+
+    fun loadMorePhotos() {
+        if (_isLoadingMore.value || searchResult.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            currentPage++
+            fetchPhotosInternal()
+            _isLoadingMore.value = false
+        }
+    }
+
+//    fun searchPhotos(query: String) {
+//        viewModelScope.launch {
+//            _searchResult.value = UiState.Loading
+//            repository.searchPhotos(query, 1, 20)
+//                .onSuccess { _searchResult.value = UiState.Success(it) }
+//                .onFailure { _searchResult.value = UiState.Error(it.message.toString()) }
+//        }
+//    }
+
+    private fun fetchPhotosInternal() {
+        viewModelScope.launch {
+            repository.searchPhotos(currentQuery, currentPage, 20)
+                .onSuccess { newResponse ->
+                    if (currentPage == 1) {
+                        _searchResult.value = UiState.Success(newResponse)
+                    } else {
+                        val currentResponse = (_searchResult.value as? UiState.Success)?.data
+                        if (currentResponse != null) {
+                            val updatedResults = currentResponse.results + newResponse.results
+                            val updatedResponse = currentResponse.copy(results = updatedResults)
+                            _searchResult.value = UiState.Success(updatedResponse)
+                        }
+                    }
+                }
                 .onFailure { _searchResult.value = UiState.Error(it.message.toString()) }
         }
     }
+
 }
