@@ -59,8 +59,7 @@ fun SearchUserPage(
                 if (lastVisibleItemIndex != null) {
                     val totalItemsCount = listState.layoutInfo.totalItemsCount
                     if (lastVisibleItemIndex >= totalItemsCount - 10 && totalItemsCount > 0) {
-                        //collectionViewModel.loadMoreCollections()
-                        //load more func
+                        seachViewModel.loadMoreUsers()
                     }
                 }
             }

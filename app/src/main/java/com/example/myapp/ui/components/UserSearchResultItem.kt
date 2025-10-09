@@ -15,10 +15,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -44,6 +46,8 @@ fun UserSearchResultItem(
     placeholder: Painter? = null,
     onPhotoClick: (String) -> Unit
 ) {
+
+    val placeholderPainter = remember { ColorPainter(Color.LightGray) }
 
     Column(
         modifier = Modifier
@@ -84,12 +88,15 @@ fun UserSearchResultItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
+
             userWithPhoto.photos.take(3).forEach { photo ->
                 AsyncImage(
                     model = photo.urls?.small,
                     contentDescription = photo.description,
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.fake_background),
+                    placeholder = placeholderPainter,
+                    error = placeholderPainter,
                     modifier = Modifier
                         .weight(1f)
                         .aspectRatio(1f)

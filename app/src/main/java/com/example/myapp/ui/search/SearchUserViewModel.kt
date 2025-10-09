@@ -31,35 +31,58 @@ class SearchUserViewModel @Inject constructor(
     private var currentUserPage = 1
     private var currentQuery = ""
 
+
     fun searchUser(query: String) {
+        // Chỉ thực hiện tìm kiếm mới nếu query thay đổi
+        if (query.isBlank() || query == currentQuery) return
+
+        currentQuery = query
+        currentUserPage = 1
+        _searchUserResult.value = UiState.Loading
+        fetchUsersInternal()
+    }
+
+    fun loadMoreUsers() {
+        if (_isLoadingMore.value || _searchUserResult.value !is UiState.Success) return
+
         viewModelScope.launch {
+            _isLoadingMore.value = true
+            currentUserPage++
+            fetchUsersInternal()
+            _isLoadingMore.value = false
+        }
+    }
 
-            if (currentUserPage == 1) {
-                _searchUserResult.value = UiState.Loading
-            }
-
+    private fun fetchUsersInternal() {
+        viewModelScope.launch {
             try {
-
-                val result = repository.searchUsers(query, 1, 20)
+                val result = repository.searchUsers(currentQuery, currentUserPage, 20)
 
                 result.onSuccess { userSearchResponse ->
-
                     val userWithPhotos = userSearchResponse.results.map { user ->
                         async {
                             val photoResult = userRepo.getUserPhotos(user.username.toString(), 1, 3)
                             val photos = photoResult.getOrNull() ?: emptyList()
-
                             UserWithPhoto(user = user, photos = photos)
-
                         }
                     }.awaitAll()
 
-                    _searchUserResult.value = UiState.Success(userWithPhotos)
+                    if (currentUserPage == 1) {
+                        _searchUserResult.value = UiState.Success(userWithPhotos)
+                    } else {
+                        val currentList =
+                            (_searchUserResult.value as? UiState.Success)?.data ?: emptyList()
+                        _searchUserResult.value = UiState.Success(currentList + userWithPhotos)
+                    }
+                }.onFailure {
+                    _searchUserResult.value = UiState.Error(it.message ?: "Unknown error")
                 }
-
             } catch (e: Exception) {
-                _searchUserResult.value = UiState.Error(e.message.toString())
+                if (currentUserPage == 1) {
+                    _searchUserResult.value = UiState.Error(e.message.toString())
+                }
             }
         }
     }
+
 }
