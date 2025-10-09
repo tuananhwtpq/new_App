@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.User
 import com.example.myapp.repository.UserRepository
@@ -30,7 +31,24 @@ class UserProfileViewModel @Inject constructor(
     private val _userLikePhoto = MutableStateFlow<UiState<List<PhotoResponse>>>(UiState.Loading)
     val userLikePhoto: StateFlow<UiState<List<PhotoResponse>>> = _userLikePhoto.asStateFlow()
 
+    private val _userCollection =
+        MutableStateFlow<UiState<List<CollectionResponse>>>(UiState.Loading)
+    val userCollection: StateFlow<UiState<List<CollectionResponse>>> = _userCollection.asStateFlow()
+
     private val username: String = savedStateHandle.get<String>("username") ?: ""
+
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
+    private val _isLoadingLikePhoto = MutableStateFlow(false)
+    val isLoadingLikePhoto: StateFlow<Boolean> = _isLoadingLikePhoto.asStateFlow()
+
+    private val _isLoadingUserCollection = MutableStateFlow(false)
+    val isLoadingUserCollection: StateFlow<Boolean> = _isLoadingUserCollection.asStateFlow()
+
+    private var currentPhotoPage = 1
+    private var currentLikePhotoPage = 1
+    private var currentUserCollectionPage = 1
 
     init {
 
@@ -38,11 +56,48 @@ class UserProfileViewModel @Inject constructor(
 
         if (username.isNotEmpty()) {
             getUserProfile(username)
-            getUserListPhoto(username, 1)
-            getUserLikePhoto(username, 1)
+            getUserListPhoto(username)
+            getUserLikePhoto(username)
+            getUserCollection(username)
         }
     }
 
+    //region LOAD MORE PHOTO
+    fun loadMorePhoto() {
+        if (_isLoadingMore.value || userListPhoto.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            getUserListPhoto(username)
+            _isLoadingMore.value = false
+        }
+    }
+
+    //region LOAD MORE LIKE PHOTO
+    fun loadMoreLikePhoto() {
+        if (_isLoadingLikePhoto.value || userLikePhoto.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingLikePhoto.value = true
+            getUserLikePhoto(username)
+            _isLoadingLikePhoto.value = false
+        }
+    }
+
+    //region LOAD MORE USER COLLECTION
+
+    fun loadMoreUserCollection() {
+        if (_isLoadingUserCollection.value || userCollection.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingUserCollection.value = true
+            getUserCollection(username)
+            _isLoadingUserCollection.value = false
+        }
+    }
+
+
+    //region GET USER PROFILE
     fun getUserProfile(username: String) {
         viewModelScope.launch {
             _userProfile.value = UiState.Loading
@@ -66,14 +121,25 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    fun getUserListPhoto(username: String, page: Int) {
+    //region GET USER LIST PHOTO
+    fun getUserListPhoto(username: String) {
         viewModelScope.launch {
-            _userListPhoto.value = UiState.Loading
+            if (currentPhotoPage == 1) {
+                _userListPhoto.value = UiState.Loading
+            }
 
             try {
-                val response = userRepository.getUserPhotos(username, page)
-                response.onSuccess {
-                    _userListPhoto.value = UiState.Success(it)
+                val response = userRepository.getUserPhotos(username, currentPhotoPage, 20)
+                response.onSuccess { newPhotos ->
+
+                    if (currentPhotoPage == 1) {
+                        _userListPhoto.value = UiState.Success(newPhotos)
+                    } else {
+                        val currentList =
+                            (_userListPhoto.value as? UiState.Success)?.data ?: emptyList()
+                        _userListPhoto.value = UiState.Success(currentList + newPhotos)
+                    }
+                    currentPhotoPage++
                 }
                     .onFailure {
                         _userListPhoto.value = UiState.Error(
@@ -88,14 +154,27 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    fun getUserLikePhoto(username: String, page: Int) {
+    //region GET USER LIKE PHOTO
+    fun getUserLikePhoto(username: String) {
         viewModelScope.launch {
-            _userLikePhoto.value = UiState.Loading
+            if (currentLikePhotoPage == 1) {
+                _userLikePhoto.value = UiState.Loading
+            }
 
             try {
-                val response = userRepository.getUserLikePhoto(username, page)
-                response.onSuccess {
-                    _userLikePhoto.value = UiState.Success(it)
+                val response =
+                    userRepository.getUserLikePhoto(username, currentLikePhotoPage, perPage = 20)
+                response.onSuccess { newLikedPhotos ->
+
+                    if (currentLikePhotoPage == 1) {
+                        _userLikePhoto.value = UiState.Success(newLikedPhotos)
+                    } else {
+                        val currentList =
+                            (_userLikePhoto.value as? UiState.Success)?.data ?: emptyList()
+                        _userLikePhoto.value = UiState.Success(currentList + newLikedPhotos)
+
+                    }
+                    currentLikePhotoPage++
                 }
                     .onFailure {
                         _userLikePhoto.value = UiState.Error(
@@ -105,6 +184,40 @@ class UserProfileViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _userLikePhoto.value = UiState.Error(e.message.toString())
+            }
+        }
+    }
+
+    //region GET USER COLLECTION
+    fun getUserCollection(username: String) {
+        viewModelScope.launch {
+            if (currentUserCollectionPage == 1) {
+                _userCollection.value = UiState.Loading
+            }
+
+            try {
+
+                val result =
+                    userRepository.getUserCollection(username, currentUserCollectionPage, 20)
+
+                result.onSuccess {
+                    if (currentUserCollectionPage == 1) {
+                        _userCollection.value = UiState.Success(it)
+                    } else {
+                        val currentList =
+                            (_userCollection.value as? UiState.Success)?.data ?: emptyList()
+                        _userCollection.value = UiState.Success(currentList + it)
+                    }
+                    currentUserCollectionPage++
+                }
+                    .onFailure {
+                        _userCollection.value = UiState.Error(it.message.toString())
+
+                    }
+
+            } catch (e: Exception) {
+                _userCollection.value = UiState.Error(e.message.toString())
+
             }
         }
     }

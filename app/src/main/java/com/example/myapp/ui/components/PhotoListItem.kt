@@ -1,8 +1,7 @@
 package com.example.myapp.ui.components
 
-import android.app.Notification.Style
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,11 +15,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,10 +33,8 @@ import coil.compose.AsyncImage
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
-import com.example.myapp.data.model.Tag
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
-import java.nio.file.WatchEvent
 
 
 @Composable
@@ -59,7 +56,6 @@ fun PhotoListItem(
                 .fillMaxWidth()
                 .clickable {
                     photo.user?.username.let { onUserClick(it.toString()) }
-                    //photo.user?.profile_image.let { onUserClick(it.toString()) }
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -91,16 +87,32 @@ fun PhotoListItem(
             shape = RoundedCornerShape(16.dp),
 
             ) {
-            AsyncImage(
-                model = photo.urls?.regular,
-                contentDescription = photo.description ?: "Unknown Photo",
-                placeholder = placeholder,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat()),
-                contentScale = ContentScale.Crop
+                    .aspectRatio(photo.width.toFloat() / photo.height.toFloat())
+            ) {
 
-            )
+                val placeholderColor = remember(photo.color) {
+                    try {
+                        Color(android.graphics.Color.parseColor(photo.color))
+                    } catch (e: Exception) {
+                        Color.LightGray
+                    }
+                }
+
+                val placeholderPainter = ColorPainter(placeholderColor)
+
+                AsyncImage(
+                    model = photo.urls?.regular,
+                    contentDescription = photo.description ?: "Unknown Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    placeholder = placeholderPainter,
+                    error = placeholderPainter,
+                    contentScale = ContentScale.Crop
+                )
+
+            }
         }
 
     }
@@ -152,7 +164,9 @@ fun PhotoListItemPreview() {
         exif = null,
         tags = null,
         width = 3000,
-        height = 6000
+        height = 6000,
+        blur_hash = "123456",
+        color = "111"
     )
 
     MyAppTheme {

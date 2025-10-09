@@ -16,6 +16,12 @@ data class CollectionResponse(
     @SerializedName("total_photos")
     val total_photos: Int,
 
+    @SerializedName("blur_hash")
+    val blur_hash: String?,
+
+    @SerializedName("color")
+    val color: String?,
+
     @SerializedName("links")
     val links: Link?,
 

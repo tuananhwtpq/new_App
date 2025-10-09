@@ -95,6 +95,12 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.4.1")
     implementation ("androidx.compose.runtime:runtime-livedata:1.9.2")
 
+    //implementation("com.github.woltapp:blurhash-compose:1.0.4")
+
+    //implementation("io.github.mortezanedaei:blurhash-compose:1.0.0")
+
+    //implementation(libs.blurhash)
+
 
 }
 

@@ -50,8 +50,10 @@ import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.remember
 import androidx.room.util.TableInfo
 import com.example.myapp.data.model.Tag
+import com.example.myapp.utils.ex.toFormattedString
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -70,11 +72,22 @@ fun PhotoDetailContent(
                     .fillMaxWidth()
                     .height(350.dp)
             ) {
+
+                val placeholderColor = remember(photo.color) {
+                    try {
+                        Color(android.graphics.Color.parseColor(photo.color))
+                    } catch (e: Exception) {
+                        Color.LightGray
+                    }
+                }
+
+                val placeholderPainter = ColorPainter(placeholderColor)
+
                 AsyncImage(
                     model = photo.urls?.regular,
                     contentDescription = photo.description,
-                    placeholder = placeholder,
-                    error = placeholder,
+                    placeholder = placeholderPainter,
+                    error = placeholderPainter,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -226,21 +239,22 @@ fun PhotoDetailContent(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InfoItem("Views", photo.downloads?.toString() ?: "0")
+                    InfoItem("Views", photo.downloads.toFormattedString())
                 }
 
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InfoItem("Downloads", photo.downloads?.toString() ?: "0")
+
+                    InfoItem("Downloads", photo.downloads.toFormattedString())
                 }
 
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    InfoItem("Likes", photo.likes?.toString() ?: "0")
+                    InfoItem("Likes", photo.likes.toFormattedString())
                 }
 
             }
@@ -338,7 +352,9 @@ fun PhotoDetailContent() {
         exif = null,
         tags = fakeTag,
         width = 3000,
-        height = 6000
+        height = 6000,
+        blur_hash = "123456",
+        color = "123456"
     )
 
     MyAppTheme {

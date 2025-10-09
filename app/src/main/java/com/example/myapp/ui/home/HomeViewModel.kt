@@ -1,5 +1,6 @@
 package com.example.myapp.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapp.data.model.CollectionResponse
@@ -36,6 +37,9 @@ class HomeViewModel @Inject constructor(
     private val _isRefreshingCollection = MutableStateFlow(false)
     val isRefreshingCollection: StateFlow<Boolean> = _isRefreshingCollection.asStateFlow()
 
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
     init {
         fetchPhotos()
         getAllCollections()
@@ -53,23 +57,53 @@ class HomeViewModel @Inject constructor(
 
     fun sortPhotos(orderBy: String) {
         currentPhotoPage = 1
-        fetchPhotos(isRefreshing = true, orderBy = orderBy)
+
+        _photoList.value = UiState.Loading
+        fetchPhotos(isRefreshing = false, orderBy = orderBy)
     }
 
+    fun loadMorePhotos() {
+        if (_isLoadingMore.value || photoList.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            fetchPhotos()
+            _isLoadingMore.value = false
+        }
+    }
+
+    fun loadMoreCollections() {
+        if (_isLoadingMore.value || collectionList.value is UiState.Loading) return
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            getAllCollections()
+            _isLoadingMore.value = false
+        }
+    }
 
     fun fetchPhotos(isRefreshing: Boolean = false, orderBy: String = "latest") {
         viewModelScope.launch {
 
-            if (!isRefreshing) {
+            if (currentPhotoPage == 1 && !isRefreshing) {
                 _photoList.value = UiState.Loading
-            } else {
+            }
+
+            if (isRefreshing) {
                 _isRefreshingPhoto.value = true
             }
 
             val result = repository.getAllPhotos(currentPhotoPage, 20, orderBy)
-            result.onSuccess {
-                _photoList.value = UiState.Success(it)
+            result.onSuccess { newPhotos ->
+                if (currentPhotoPage == 1) {
+                    _photoList.value = UiState.Success(newPhotos)
+                } else {
+                    val currentList =
+                        (_photoList.value as UiState.Success).data.toMutableList() ?: emptyList()
+                    _photoList.value = UiState.Success(currentList + newPhotos)
+                }
                 currentPhotoPage++
+                Log.d("HomeViewModel", "Result : $newPhotos")
             }.onFailure {
                 _photoList.value = UiState.Error(
                     "Lỗi không lấy được dữ liệu HomeViewModel: ${it.message}" ?: "Unknown error"
@@ -83,9 +117,11 @@ class HomeViewModel @Inject constructor(
     fun getAllCollections(isRefreshing: Boolean = false) {
         viewModelScope.launch {
 
-            if (!isRefreshing) {
+            if (currentCollectionPage == 1 && !isRefreshing) {
                 _collectionList.value = UiState.Loading
-            } else {
+            }
+
+            if (isRefreshing) {
                 _isRefreshingCollection.value = true
             }
 
@@ -93,8 +129,16 @@ class HomeViewModel @Inject constructor(
 
                 val result = collectionRepository.getAllCollections(currentCollectionPage, 20)
 
-                result.onSuccess {
-                    _collectionList.value = UiState.Success(it)
+                result.onSuccess { newCollections ->
+                    if (currentCollectionPage == 1) {
+                        _collectionList.value = UiState.Success(newCollections)
+                    } else {
+                        val currentList =
+                            (_collectionList.value as UiState.Success).data.toMutableList()
+                                ?: emptyList()
+                        _collectionList.value = UiState.Success(currentList + newCollections)
+                    }
+                    //_collectionList.value = UiState.Success(it)
                     currentCollectionPage++
                 }
                     .onFailure {
@@ -113,5 +157,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
 }
+
+val <T> UiState<T>.data: T?
+    get() = (this as? UiState.Success)?.data

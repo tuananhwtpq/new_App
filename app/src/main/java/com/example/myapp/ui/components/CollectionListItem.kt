@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,12 +39,15 @@ import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
 import java.nio.file.WatchEvent
 
+
+//region COLLECTION LIST ITEM
 @Composable
 fun CollectionListItem(
     collection: CollectionResponse,
     onItemClick: (String) -> Unit,
     placeholder: Painter? = null,
-    onUserClick: (String) -> Unit
+    onUserClick: (String) -> Unit,
+
 ) {
 
     Column(
@@ -95,10 +99,21 @@ fun CollectionListItem(
 
             Box(modifier = Modifier.fillMaxSize()) {
 
+                val placeholderColor = remember(collection.color) {
+                    try {
+                        Color(android.graphics.Color.parseColor(collection.color))
+                    } catch (e: Exception) {
+                        Color.LightGray
+                    }
+                }
+
+                val placeholderPainter = ColorPainter(placeholderColor)
+
                 AsyncImage(
                     model = collection.cover_photo?.urls?.regular,
                     contentDescription = collection.description ?: "Unknown collection",
-                    placeholder = placeholder,
+                    placeholder = placeholderPainter,
+                    error = placeholderPainter,
                     modifier = Modifier
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -129,6 +144,8 @@ fun CollectionListItem(
     }
 }
 
+
+//region PREVIEW
 @Preview
 @Composable
 fun CollectionListItem() {
@@ -175,7 +192,9 @@ fun CollectionListItem() {
         total_photos = 1000,
         cover_photo = newCoverPhoto,
         user = newUser,
-        links = null
+        links = null,
+        blur_hash = null,
+        color = null
     )
 
     MyAppTheme {

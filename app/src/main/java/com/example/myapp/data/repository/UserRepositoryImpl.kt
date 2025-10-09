@@ -1,5 +1,6 @@
 package com.example.myapp.data.repository
 
+import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.User
 import com.example.myapp.data.remote.UnsplashApiService
@@ -24,11 +25,12 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getUserPhotos(
         username: String,
-        page: Int
+        page: Int,
+        perPage: Int
     ): Result<List<PhotoResponse>> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getUserPhotos(username, page, 10)
+                val response = apiService.getUserPhotos(username, page, perPage)
                 Result.success(response)
             } catch (e: Exception) {
                 Result.failure(e)
@@ -39,11 +41,27 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getUserLikePhoto(
         username: String,
-        page: Int
+        page: Int,
+        perPage: Int
     ): Result<List<PhotoResponse>> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getUserLikes(username, page, 10)
+                val response = apiService.getUserLikes(username, page, perPage)
+                Result.success(response)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    override suspend fun getUserCollection(
+        username: String,
+        page: Int,
+        perPage: Int
+    ): Result<List<CollectionResponse>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getUserCollections(username, page, perPage)
                 Result.success(response)
             } catch (e: Exception) {
                 Result.failure(e)
