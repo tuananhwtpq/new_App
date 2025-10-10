@@ -1,6 +1,7 @@
 package com.example.myapp.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,16 +49,17 @@ fun PhotoListItem(
     onUserClick: (String) -> Unit
 ) {
 
-
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(16.dp))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) {
                     photo.user?.username.let { onUserClick(it.toString()) }
                 },
             verticalAlignment = Alignment.CenterVertically
@@ -83,7 +86,10 @@ fun PhotoListItem(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable() {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) {
                     onItemClick(photo.id)
                 },
             shape = RoundedCornerShape(16.dp),
@@ -94,14 +100,6 @@ fun PhotoListItem(
                     .fillMaxWidth()
                     .aspectRatio(photo.width.toFloat() / photo.height.toFloat())
             ) {
-
-//                val placeholderColor = remember(photo.color) {
-//                    try {
-//                        Color(android.graphics.Color.parseColor(photo.color))
-//                    } catch (e: Exception) {
-//                        Color.LightGray
-//                    }
-//                }
                 /**
                  * Tạo anim cho ảnh bawnfg crossfade(true)
                  * -> có thể truyền tham số vào để căn chỉnh thời gian load anim

@@ -1,10 +1,8 @@
 package com.example.myapp.ui.detail
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +33,7 @@ import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
 import com.example.myapp.ui.components.PhotoListItem
 import com.example.myapp.ui.home.CollectionDetailViewModel
+import com.example.myapp.ui.search.EmptyState
 import com.example.myapp.utils.UiState
 
 
@@ -139,7 +137,7 @@ fun CollectionDetailScreen(
             }
 
             is UiState.Error -> {
-                Log.e("CollectionDetailScreen", "Error: ${state.message}")
+                EmptyState()
             }
 
             else -> {}

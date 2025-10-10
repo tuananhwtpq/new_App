@@ -69,8 +69,8 @@ fun SearchPhotosPage(
                         onItemClick = {
                             navController.navigate(Screen.Detail.createRoute(photo.id))
                         },
-                        onUserClick = {
-
+                        onUserClick = { userId ->
+                            navController.navigate(Screen.Profile.createRoute(userId))
                         }
                     )
                 }
