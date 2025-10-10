@@ -1,6 +1,7 @@
 package com.example.myapp.ui.components
 
 import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -33,7 +33,6 @@ import com.example.myapp.ui.home.HomeViewModel
 import com.example.myapp.utils.Constants.SCROLL_THRESHOLD
 import com.example.myapp.utils.UiState
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlin.math.abs
 
 
@@ -42,7 +41,8 @@ import kotlin.math.abs
 fun CollectionScreen(
     navController: NavController, viewModel: HomeViewModel = hiltViewModel(),
     onScroll: (Boolean) -> Unit,
-    listState: LazyListState
+    listState: LazyListState,
+    paddingValues: PaddingValues
 ) {
     val uiState by viewModel.collectionList.collectAsState()
 
@@ -116,7 +116,8 @@ fun CollectionScreen(
                         navController.navigate(Screen.Profile.createRoute(it))
                     },
                     listState = listState,
-                    isLoadingMore = isLoadingMore
+                    isLoadingMore = isLoadingMore,
+                    paddingValues = paddingValues
                 )
             }
 
@@ -137,12 +138,23 @@ fun CollectionTabContent(
     onCollectionClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
     listState: LazyListState = rememberLazyListState(),
-    isLoadingMore: Boolean
+    isLoadingMore: Boolean,
+    paddingValues: PaddingValues
 ) {
+
+
+    val bottomPadding = paddingValues.calculateBottomPadding()
+    val animatedBottomPadding by animateDpAsState(
+        targetValue = bottomPadding,
+        label = "bottom_padding_animation"
+    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = PaddingValues(
+            top = 8.dp,
+            bottom = animatedBottomPadding + 8.dp
+        ),
         state = listState
     ) {
         items(
