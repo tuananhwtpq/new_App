@@ -188,7 +188,8 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .height(56.dp)
                             .clip(FabCutoutShape()),
-                        tonalElevation = 8.dp
+                        tonalElevation = 8.dp,
+                        containerColor = Color.White
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -239,7 +240,6 @@ fun HomeScreen(
                     }
                 }
             }
-
         }
 
     ) { paddingValues ->
