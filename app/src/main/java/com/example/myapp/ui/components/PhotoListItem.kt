@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,9 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
@@ -94,27 +95,26 @@ fun PhotoListItem(
                     .aspectRatio(photo.width.toFloat() / photo.height.toFloat())
             ) {
 
-                val placeholderColor = remember(photo.color) {
-                    try {
-                        Color(android.graphics.Color.parseColor(photo.color))
-                    } catch (e: Exception) {
-                        Color.LightGray
-                    }
-                }
+//                val placeholderColor = remember(photo.color) {
+//                    try {
+//                        Color(android.graphics.Color.parseColor(photo.color))
+//                    } catch (e: Exception) {
+//                        Color.LightGray
+//                    }
+//                }
+                /**
+                 * Tạo anim cho ảnh bawnfg crossfade(true)
+                 * -> có thể truyền tham số vào để căn chỉnh thời gian load anim
+                 */
 
-                val placeholderPainter = ColorPainter(placeholderColor)
+                val imageRequest = ImageRequest.Builder(LocalContext.current)
+                    .data(photo.urls?.regular)
+                    .crossfade(700)
+                    .build()
 
-//                AsyncImage(
-//                    model = photo.urls?.regular,
-//                    contentDescription = photo.description ?: "Unknown Photo",
-//                    modifier = Modifier.fillMaxSize(),
-//                    placeholder = placeholderPainter,
-//                    error = placeholderPainter,
-//                    contentScale = ContentScale.Crop
-//                )
 
                 AsyncImage(
-                    model = photo.urls?.regular,
+                    model = imageRequest,
                     contentDescription = photo.description ?: "Unknown Photo",
                     modifier = Modifier.fillMaxSize(),
                     placeholder = BlurHashPainter(

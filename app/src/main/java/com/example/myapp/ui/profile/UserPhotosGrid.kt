@@ -23,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
@@ -98,8 +100,14 @@ fun UserPhotosGrid(
 
                         val placeholderPainter = ColorPainter(placeholderColor)
 
+                        val imageRequest = ImageRequest.Builder(LocalContext.current)
+                            .data(photo.urls?.regular)
+                            .crossfade(700)
+                            .build()
+
+
                         AsyncImage(
-                            model = photo.urls?.regular,
+                            model = imageRequest,
                             contentDescription = photo.description,
                             placeholder = BlurHashPainter(
                                 blurHash = photo.blur_hash,

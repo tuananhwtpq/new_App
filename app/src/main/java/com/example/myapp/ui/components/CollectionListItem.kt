@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,10 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.myapp.data.model.CollectionResponse
 import com.example.myapp.data.model.CoverPhoto
 import com.example.myapp.data.model.PhotoUrl
@@ -38,7 +38,6 @@ import com.example.myapp.data.model.ProfileImage
 import com.example.myapp.data.model.User
 import com.example.myapp.ui.theme.MyAppTheme
 import com.wajahatiqbal.blurhash.BlurHashPainter
-import java.nio.file.WatchEvent
 
 
 //region COLLECTION LIST ITEM
@@ -100,18 +99,13 @@ fun CollectionListItem(
 
             Box(modifier = Modifier.fillMaxSize()) {
 
-                val placeholderColor = remember(collection.color) {
-                    try {
-                        Color(android.graphics.Color.parseColor(collection.color))
-                    } catch (e: Exception) {
-                        Color.LightGray
-                    }
-                }
-
-                val placeholderPainter = ColorPainter(placeholderColor)
+                val imageRequest = ImageRequest.Builder(LocalContext.current)
+                    .data(collection.cover_photo?.urls?.regular)
+                    .crossfade(700)
+                    .build()
 
                 AsyncImage(
-                    model = collection.cover_photo?.urls?.regular,
+                    model = imageRequest,
                     contentDescription = collection.description ?: "Unknown collection",
                     placeholder = BlurHashPainter(
                         blurHash = collection.cover_photo?.blur_hash
@@ -121,7 +115,13 @@ fun CollectionListItem(
                         punch = 1F,
                         scale = 0.1F
                     ),
-                    error = placeholderPainter,
+                    error = BlurHashPainter(
+                        blurHash = collection.cover_photo?.blur_hash
+                            ?: collection.cover_photo?.color,
+                        width = 300,
+                        height = 300,
+                        punch = 1F,
+                    ),
                     modifier = Modifier
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop

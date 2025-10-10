@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,16 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.myapp.R
+import coil.request.ImageRequest
 import com.example.myapp.data.model.PhotoResponse
-import com.example.myapp.data.model.PhotoUrl
 import com.example.myapp.data.model.ProfileImage
-import com.example.myapp.data.model.SearchUserResponse
 import com.example.myapp.data.model.Social
 import com.example.myapp.data.model.User
 import com.example.myapp.data.model.UserWithPhoto
@@ -91,8 +88,13 @@ fun UserSearchResultItem(
 
 
             userWithPhoto.photos.take(3).forEach { photo ->
+
+                val imageRequest = ImageRequest.Builder(LocalContext.current)
+                    .data(photo.urls?.small)
+                    .build()
+
                 AsyncImage(
-                    model = photo.urls?.small,
+                    model = imageRequest,
                     contentDescription = photo.description,
                     contentScale = ContentScale.Crop,
                     placeholder = placeholderPainter,

@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Scaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -31,9 +30,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.myapp.data.model.PhotoResponse
 import com.example.myapp.ui.Screen
 import com.example.myapp.ui.components.LottieLoadingIndicator
@@ -133,8 +134,13 @@ fun UserLikePhoto(
 
                             val placeholderPainter = ColorPainter(placeholderColor)
 
+                            val imageRequest = ImageRequest.Builder(LocalContext.current)
+                                .data(photo.urls?.regular)
+                                .crossfade(700)
+                                .build()
+
                             AsyncImage(
-                                model = photo.urls?.regular,
+                                model = imageRequest,
                                 contentDescription = photo.description,
                                 placeholder = BlurHashPainter(
                                     blurHash = photo.blur_hash,
